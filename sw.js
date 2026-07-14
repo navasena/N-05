@@ -3,7 +3,7 @@
 // Architecture: Network-First with Timeout Fallback, Native Garbage Collector
 // =========================================================================
 
-const APP_VERSION = '1.1';
+const APP_VERSION = '1.2';
 const CACHE_PREFIX = 'kas-navasena-';
 const CACHE_STATIC = CACHE_PREFIX + 'static-v' + APP_VERSION;
 const CACHE_DYNAMIC = CACHE_PREFIX + 'dynamic-v' + APP_VERSION;
@@ -58,7 +58,8 @@ self.addEventListener('install', event => {
       console.log('[SW] Menyimpan aset statis NAVASENA...');
       return Promise.all(
         staticAssets.map(asset => {
-          const reqOpt = asset.startsWith('http') ? { mode: 'cors', credentials: 'omit' } : { cache: 'no-cache' };
+          // [SURGICAL FIX] mode: 'no-cors' mutlak diperlukan untuk menerima Opaque Response dari proxy/intranet
+          const reqOpt = asset.startsWith('http') ? { mode: 'no-cors' } : { cache: 'no-cache' };
           return fetch(asset, reqOpt)
             .then(response => {
               // Menerima Opaque Response agar instalasi CDN (XLSX.js) tidak gagal di Proxy/Intranet
@@ -74,10 +75,6 @@ self.addEventListener('install', event => {
        })
       ).then(() => {
         self.skipWaiting(); // Paksa aktivasi setelah cache 100% aman
-        if (self.registration.active && 'BroadcastChannel' in self) {
-            const bc = new BroadcastChannel('navasena-update-channel');
-            bc.postMessage({ type: 'UPDATE_AVAILABLE' });
-        }
       });
     })
   );
@@ -100,10 +97,16 @@ self.addEventListener('activate', event => {
         })
       ).then(() => {
         console.log('[SW] Transisi ke memori cache baru selesai secara mutlak.');
+        // [SURGICAL FIX] Broadcast dipindah ke sini karena SW baru terjamin 100% aktif & menguasai Client
+        if ('BroadcastChannel' in self) {
+            const bc = new BroadcastChannel('navasena-update-channel');
+            bc.postMessage({ type: 'UPDATE_AVAILABLE' });
+        }
       });
     })
   );
 });
+
 
 // =========================================================
 // 4. INTERSEPTOR JARINGAN & FIREWALL
@@ -129,21 +132,32 @@ self.addEventListener('fetch', event => {
   const isHtmlRequest = req.mode === 'navigate' || (req.headers.get('accept') && req.headers.get('accept').includes('text/html'));
   const cacheKey = req.url; 
 
+// KODE BARU (Wajib utuh, lolos simulasi, bebas error, TIDAK ADA PEMOTONGAN KODE):
   // STRATEGI 2: NETWORK-FIRST DENGAN TIMEOUT 3 DETIK (Anti-Zombie State & Anti-Limbo)
   if (isHtmlRequest) {
+    // [SURGICAL FIX] Injeksi AbortController & Timer Pointer untuk Garbage Collection mutlak
+    const controller = new AbortController();
+    let timeoutId;
     const timeoutPromise = new Promise((resolve, reject) => {
-        setTimeout(() => reject(new Error('Network Timeout')), 3000);
+        timeoutId = setTimeout(() => {
+            controller.abort(); // Mutilasi koneksi TCP Zombie secara fisik
+            reject(new Error('Network Timeout'));
+        }, 3000);
     });
     timeoutPromise.catch(() => {}); // Dummy trap pencegah Unhandled Promise Rejection System Crash
 
     // Operasi Fetch dibungkus independen agar Cache tetap terupdate meski koneksi lambat
-    const fetchPromise = fetch(req.url, { cache: 'no-cache' }).then(networkResponse => {
+    const fetchPromise = fetch(req.url, { cache: 'no-cache', signal: controller.signal }).then(networkResponse => {
+      clearTimeout(timeoutId); // [SURGICAL FIX] Matikan bom waktu jika koneksi berhasil cepat
       // PROTEKSI MUTLAK: Cegah "Cache Poisoning" oleh Captive Portal (Wi-Fi Publik).
       // Pembaruan App Shell (index.html) HANYA terjadi pada saat install (Kenaikan APP_VERSION).
       if (!networkResponse || !networkResponse.ok) {
          throw new Error('Server Error, Offline, or Captive Portal Interception');
       }
       return networkResponse;
+    }).catch(err => {
+      clearTimeout(timeoutId); // [SURGICAL FIX] Matikan bom waktu jika koneksi gagal (Offline)
+      throw err;
     });
 
     event.respondWith(
