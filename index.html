@@ -3443,7 +3443,8 @@ let minYear = oldestYear;
 
 
         function openDompetSelect() {
-            let opts = state.dompet.filter(d => d.status === 'aktif').map(d => ({label: d.nama, value: d.id}));
+            // SURGICAL FIX: Isolasi Dompet Panitia (is_pj) agar tidak bocor ke transaksi Reguler
+            let opts = state.dompet.filter(d => d.status === 'aktif' && !d.is_pj).map(d => ({label: d.nama, value: d.id}));
             openSelectModal('Pilih Dompet Kas', opts, document.getElementById('trx-dompet-val').value, (val) => {
                 document.getElementById('trx-dompet-val').value = val;
                 let sel = opts.find(o => o.value === val);
@@ -11887,6 +11888,73 @@ function cutOffYear() {
     executePjAdvance = window.executePjAdvance;
     updateDashboard = window.updateDashboard;
     renderFomoWidget = window.renderFomoWidget;
+
+        // =========================================================
+        // ENGINE CLOUD SYNC & CORS PREFLIGHT BYPASS
+        // =========================================================
+        
+        // PASTIKAN ANDA MENGGANTI URL INI DENGAN URL WEB APP GOOGLE SCRIPT ANDA
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbyU2StrRDpXjyCAwF7g8zcJpxvHOxdVR_WpKhEnRgOTL4tDFMQvxcyaY_s2bG2th6cM/exec"; 
+        const GAS_TOKEN = "Navasena2026"; // Harus sama dengan TOKEN_SECRET di backend GAS
+
+        async function syncToCloud(isSilent = false) {
+            if (isKiosk) return; // Mode Publik tidak boleh Push Data
+            
+            if (!navigator.onLine) {
+                if (!isSilent) showToast("❌ Gagal: Tidak ada koneksi internet.");
+                return;
+            }
+
+            if (!isSilent) {
+                let btn = document.getElementById('btn-hdr-upload');
+                if(btn) btn.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="animation: spin 1s linear infinite; margin-bottom: 2px;"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg><span style="font-size: 8px; font-weight: 800;">SYNC...</span>`;
+            }
+
+            // 1. Ekstraksi seluruh Data Offline dari IndexedDB
+            let payload = {
+                token: GAS_TOKEN,
+                is_master: true, // Beri tahu GAS bahwa ini adalah data master dari Bendahara
+                trx: state.trx,
+                anggota: state.anggota,
+                event: state.event,
+                dompet: state.dompet,
+                aspirasi: [], // Jika Anda punya tabel aspirasi, masukkan di sini
+                settings: {
+                    iuran_nom: getSetting('iuran_nom', 10000),
+                    kat_masuk: getSetting('kat_masuk', 'Donasi, Sponsor, Iuran Anggota, Kas, Hamba Allah'),
+                    kat_keluar: getSetting('kat_keluar', 'Operasional, Konsumsi, Darurat, Belanja Alat, Lainnya')
+                }
+            };
+
+            try {
+                // 2. SURGICAL FIX: TEMBAKAN POST DENGAN BYPASS CORS (TEXT/PLAIN)
+                let response = await fetch(GAS_URL + "?token=" + GAS_TOKEN, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'text/plain;charset=utf-8' // MUTLAK: Jangan gunakan application/json
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                let resData = await response.json();
+
+                if (resData.status === "Sukses") {
+                    localStorage.setItem('nav_unsynced', 'false');
+                    if (!isSilent) showToast("✔️ Sinkronisasi Cloud Berhasil!");
+                } else {
+                    throw new Error(resData.error || resData.pesan || "Terjadi kesalahan sistem GAS.");
+                }
+            } catch (err) {
+                console.error("Cloud Sync Error:", err);
+                if (!isSilent) showToast("❌ Sinkronisasi Gagal: " + err.message);
+            } finally {
+                if (!isSilent) {
+                    let btn = document.getElementById('btn-hdr-upload');
+                    if(btn) btn.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 2px;"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M12 12v9"/><path d="m16 16-4-4-4 4"/></svg><span style="font-size: 8px; font-weight: 800; letter-spacing: 0.5px;">UPLOAD</span>`;
+                }
+            }
+        }
+
 </script>
 
 </body>
