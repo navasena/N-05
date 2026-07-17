@@ -5,7 +5,7 @@
 
 // KODE BARU (Wajib utuh, lolos simulasi, bebas error, TIDAK ADA PEMOTONGAN KODE):
 
-const APP_VERSION = '1.3';
+const APP_VERSION = '1.4';
 const CACHE_PREFIX = 'kas-navasena-';
 const CACHE_STATIC = CACHE_PREFIX + 'static-v' + APP_VERSION;
 const CACHE_DYNAMIC = CACHE_PREFIX + 'dynamic-v' + APP_VERSION;
