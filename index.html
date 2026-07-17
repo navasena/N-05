@@ -79,8 +79,15 @@
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: 'Inter', sans-serif; margin: 0; padding: 0; }
-        html, body { overscroll-behavior-y: none !important; overscroll-behavior-x: none !important; }
-        body { background: var(--bg); color: var(--text-main); overflow-x: hidden; min-height: 100vh; display: flex; flex-direction: column; padding-bottom: 90px; transition: background-color 0.3s; }
+
+        html { overscroll-behavior: none !important; background: var(--bg); }
+        body { 
+            background: var(--bg); color: var(--text-main); 
+            min-height: 100vh; overflow-x: hidden; overflow-y: visible; -webkit-overflow-scrolling: touch;
+            display: block; 
+            transition: background-color 0.3s; position: relative; padding: 0; margin: 0;
+        }
+
         body.modal-open { overflow: hidden; }
         .modal { overscroll-behavior: contain; }
 
@@ -117,7 +124,7 @@
         .header-btn:active { background: rgba(255,255,255,0.25); transform: scale(0.95);}
 
         /* SPA Layout */
-        .view-section { display: none; padding: 20px 24px; animation: fadeIn 0.3s ease; }
+        .view-section { display: none; padding: 20px 24px 130px 24px; animation: fadeIn 0.3s ease; }
         .view-section.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
@@ -157,20 +164,19 @@
         .trx-footer { border-top: 1.5px dashed var(--border); padding-top: 16px; display: flex; justify-content: space-between; align-items: center; min-height: 48px; }
 
         /* BOTTOM NAV & FAB */
-        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); border-top: 1px solid var(--border); display: flex; justify-content: space-around; padding: 12px 0 24px 0; z-index: 1000; box-shadow: 0 -4px 10px rgba(0,0,0,0.03); }
-        .nav-item { display: flex; flex-direction: column; align-items: center; gap: 6px; color: var(--text-muted); font-size: 10px; font-weight: 700; cursor: pointer; transition: 0.2s; flex: 1; }
+        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); border-top: 1px solid var(--border); display: flex; justify-content: space-around; padding: 12px 0 24px 0; z-index: 1000; box-shadow: 0 -4px 10px rgba(0,0,0,0.03); transform: translateZ(0); will-change: transform; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; gap: 6px; color: var(--text-muted); font-size: 10px; font-weight: 700; cursor: pointer; transition: color 0.2s, background-color 0.2s; flex: 1; }
         .nav-item.active { color: var(--primary); }
         .nav-item svg { transition: transform 0.2s; }
         .nav-item.active svg { transform: translateY(-3px); }
-        .fab { position: fixed; bottom: 100px; right: 24px; width: 60px; height: 60px; border-radius: 18px; background: var(--primary); color: var(--text-light); display: flex; justify-content: center; align-items: center; box-shadow: 0 10px 25px rgba(30, 58, 138, 0.4); z-index: 900; cursor: pointer; border: none; transition: 0.2s; }
-        .fab:active { transform: scale(0.92); }
+        .fab { position: fixed; bottom: 100px; right: 24px; width: 60px; height: 60px; border-radius: 18px; background: var(--primary); color: var(--text-light); display: flex; justify-content: center; align-items: center; box-shadow: 0 10px 25px rgba(30, 58, 138, 0.4); z-index: 900; cursor: pointer; border: none; transition: transform 0.2s, background-color 0.2s, box-shadow 0.2s; transform: translateZ(0); will-change: transform; }
+        .fab:active { transform: scale(0.92) translateZ(0); }
         
-        .fab-aspirasi { position: fixed; bottom: 100px; left: 24px; width: 50px; height: 50px; border-radius: 16px; background: #9D174D; color: white; display: none; justify-content: center; align-items: center; box-shadow: 0 10px 25px rgba(157, 23, 77, 0.4); z-index: 900; cursor: pointer; border: none; transition: 0.2s; }
-        .fab-aspirasi:active { transform: scale(0.92); }
+        .fab-aspirasi { position: fixed; bottom: 100px; left: 24px; width: 50px; height: 50px; border-radius: 16px; background: #9D174D; color: white; display: none; justify-content: center; align-items: center; box-shadow: 0 10px 25px rgba(157, 23, 77, 0.4); z-index: 900; cursor: pointer; border: none; transition: transform 0.2s, background-color 0.2s, box-shadow 0.2s; transform: translateZ(0); will-change: transform; }
+        .fab-aspirasi:active { transform: scale(0.92) translateZ(0); }
         body.kiosk-mode .fab-aspirasi { display: flex !important; }
 
         /* BUTTONS */
-
         .btn { padding: 14px 20px; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer; border: none; display: flex; justify-content: center; align-items: center; gap: 10px; width: 100%; transition: 0.2s; box-shadow: var(--shadow-sm); }
         .btn:active { transform: scale(0.96); box-shadow: none; }
         .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
@@ -566,8 +572,12 @@
             state.trx.sort((a,b) => b.ts - a.ts); 
             state.anggota.sort((a,b) => a.nama.localeCompare(b.nama));
             
-            // Kalkulasi XP Pre-render
-            if (typeof calculateAllXP === 'function') calculateAllXP();
+            // Kalkulasi XP Pre-render (DILINDUNGI FAILSAFE ISOLATION)
+            try {
+                if (typeof calculateAllXP === 'function') calculateAllXP();
+            } catch (xpError) {
+                console.error("[FAILSAFE SYSTEM] Kalkulasi Gamifikasi KTA Gagal. Melindungi integritas Dashboard Utama:", xpError);
+            }
         }
 
         function saveStore(store, data) {
@@ -622,16 +632,15 @@
             }
 
             try {
-                // ANTI ELASTIC PULL-TO-REFRESH (JS SHIELD)
+
+                // ANTI ELASTIC PULL-TO-REFRESH (JS SHIELD) - ROBUST BODY SCROLL
                 let _startY = 0;
                 document.addEventListener('touchstart', e => { _startY = e.touches[0].pageY; }, {passive: true});
                 document.addEventListener('touchmove', e => {
-                    // SURGICAL FIX: Bypass shield mutlak jika modal terbuka agar scroll tidak lumpuh
                     if (document.body.classList.contains('modal-open')) return;
                     
-                    if (window.scrollY <= 0 && e.touches[0].pageY > _startY) {
-                        e.preventDefault();
-                    }
+                    // SURGICAL FIX: Perintah e.preventDefault() telah DIMUSNAHKAN. 
+                    // Atribut overscroll-behavior di CSS sudah cukup untuk mengamankan UI.
                 }, {passive: false});
 
                 // ANGKAT TIRAI CINEMATIC DENGAN MULUS (FAIL-SAFE GLOBAL DIPINDAH KE ATAS SEBELUM DB LOAD)
@@ -640,7 +649,18 @@
                         let fx = document.getElementById('fx-curtain');
                         if(fx) fx.remove();
                         sessionStorage.removeItem('_nx_logout_fx');
-                        document.body.style.animation = 'fadeIn 0.6s ease forwards';
+                        
+                        // SURGICAL FIX: Transisi Opacity Murni (Anti-Containing Block Bug)
+                        document.body.style.opacity = '0';
+                        document.body.style.transform = 'none';
+                        document.body.style.filter = 'none';
+                        void document.body.offsetWidth; // Paksa DOM Reflow Mutlak
+                        
+                        document.body.style.transition = 'opacity 0.6s ease';
+                        document.body.style.opacity = '1';
+                        
+                        // Sapu bersih sisa atribut transisi setelah selesai agar DOM Body steril
+                        setTimeout(() => { document.body.style.transition = ''; }, 600);
                     }, 50);
                 }
 
@@ -767,8 +787,8 @@
         <!-- ===================================== -->
         <!-- MENU 1: BERANDA / DASHBOARD           -->
         <!-- ===================================== -->
-        <section id="view-home" class="view-section active" style="padding: 20px 24px 0 24px;">
-            
+        <section id="view-home" class="view-section active">
+           
             <!-- TOTAL KAS KESELURUHAN -->
             <div class="card-saldo-apex no-select" id="main-card">
                 <div style="position: absolute; top: -50px; right: -20px; width: 150px; height: 150px; background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%); border-radius: 50%;"></div>
@@ -818,7 +838,8 @@
             </div>
 
             <!-- TOMBOL WA REPORT (DISEMBUNYIKAN SAAT GUEST MODE) -->
-            <button class="btn btn-success kiosk-hide no-select" style="margin-bottom: 120px; background: #25D366; color: white; padding: 16px; font-size: 14px; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(37, 211, 102, 0.4);" onclick="generateLaporanWA()">
+            <button class="btn btn-success kiosk-hide no-select" style="margin-bottom: 24px; background: #25D366; color: white; padding: 16px; font-size: 14px; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(37, 211, 102, 0.4);" onclick="generateLaporanWA()">
+
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 4px;"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.095 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg> Kirim Laporan Bulan Ini Ke Grup
             </button>
         </section>
@@ -1012,26 +1033,26 @@
                             
                                 // STATE 2: OUTSTANDING / ADA TUNGGAKAN
                                 billingCard.innerHTML = `
-                                <div style="background: linear-gradient(135deg, #450A0A 0%, #7F1D1D 100%); padding: 20px; color: white; box-shadow: 0 10px 25px -5px rgba(127, 29, 29, 0.5); border: 1px solid rgba(239, 68, 68, 0.3);">
+                                <div style="background: linear-gradient(135deg, #FFFFFF 0%, #FFF1F2 100%); padding: 20px; color: #881337; box-shadow: 0 10px 25px -5px rgba(225, 29, 72, 0.15); border: 1.5px solid #FECDD3;">
                                     <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px;">
                                         <div>
-                                            <div style="font-size: 10px; font-weight: 800; color: #FECDD3; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 6px; display: flex; align-items: center; gap: 6px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> TAGIHAN KAS BELUM LUNAS</div>
-                                            <div style="font-size: 28px; font-weight: 900; letter-spacing: -1px; text-shadow: 0 4px 10px rgba(0,0,0,0.5);">Rp ${fmtRp(arrearsData.nominal)}</div>
+                                            <div style="font-size: 10px; font-weight: 900; color: #E11D48; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 6px; display: flex; align-items: center; gap: 6px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> TAGIHAN KAS BELUM LUNAS</div>
+                                            <div style="font-size: 28px; font-weight: 900; letter-spacing: -1px; text-shadow: 0 2px 4px rgba(225, 29, 72, 0.1); color: #4C0519;">Rp ${fmtRp(arrearsData.nominal)}</div>
                                         </div>
-                                        <div style="background: rgba(220, 38, 38, 0.4); border: 1px solid rgba(239, 68, 68, 0.5); padding: 6px 12px; border-radius: 8px; font-size: 10px; font-weight: 900; color: #FECACA; letter-spacing: 0.5px; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">URGENT</div>
+                                        <div style="background: linear-gradient(135deg, #E11D48 0%, #BE123C 100%); padding: 6px 12px; border-radius: 8px; font-size: 10px; font-weight: 900; color: #FFFFFF; letter-spacing: 0.5px; box-shadow: 0 4px 10px rgba(225, 29, 72, 0.3); border: 1px solid #9F1239;">URGENT</div>
                                     </div>
-                                    <div style="background: rgba(0,0,0,0.3); border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); overflow: hidden;">
-                                        <div style="padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-between; align-items: center;">
-                                            <span style="font-size: 11px; font-weight: 700; color: #FDA4AF;">Akumulasi Tunggakan:</span>
-                                            <span style="font-size: 12px; font-weight: 900; color: #FFFFFF;">${arrearsData.count} Bulan</span>
+                                    <div style="background: rgba(255, 255, 255, 0.7); border-radius: 12px; border: 1px solid #FFE4E6; overflow: hidden; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">
+                                        <div style="padding: 12px 16px; border-bottom: 1px solid #FFE4E6; display: flex; justify-content: space-between; align-items: center;">
+                                            <span style="font-size: 11px; font-weight: 700; color: #9F1239;">Akumulasi Tunggakan:</span>
+                                            <span style="font-size: 12px; font-weight: 900; color: #4C0519;">${arrearsData.count} Bulan</span>
                                         </div>
-                                        <div style="padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-between; align-items: center;">
-                                            <span style="font-size: 11px; font-weight: 700; color: #FDA4AF;">Tarif Iuran Dasar:</span>
-                                            <span style="font-size: 12px; font-weight: 900; color: #FFFFFF;">Rp ${fmtRp(getSetting('iuran_nom', 10000))} / bln</span>
+                                        <div style="padding: 12px 16px; border-bottom: 1px solid #FFE4E6; display: flex; justify-content: space-between; align-items: center;">
+                                            <span style="font-size: 11px; font-weight: 700; color: #9F1239;">Tarif Iuran Dasar:</span>
+                                            <span style="font-size: 12px; font-weight: 900; color: #4C0519;">Rp ${fmtRp(getSetting('iuran_nom', 10000))} / bln</span>
                                         </div>
-                                        <div style="padding: 16px; background: rgba(0,0,0,0.2);">
-                                            <div style="font-size: 10.5px; font-weight: 800; color: #FCA5A5; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;">Rincian Periode:</div>
-                                            <div style="font-size: 13px; font-weight: 800; color: #FFFFFF; line-height: 1.6; word-break: break-word;">${esc(arrearsData.text)}</div>
+                                        <div style="padding: 16px; background: #FFFFFF;">
+                                            <div style="font-size: 10.5px; font-weight: 800; color: #E11D48; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;">Rincian Periode:</div>
+                                            <div style="font-size: 13px; font-weight: 800; color: #881337; line-height: 1.6; word-break: break-word;">${esc(arrearsData.text)}</div>
                                         </div>
                                     </div>
                                 </div>`;
@@ -1502,44 +1523,54 @@
                     }
                 }
 
+                // SURGICAL FIX: Injeksi Kapsul Waktu Arsip ke Mesin XP
                 state.anggota.forEach(ag => {
-                    let xp_kepatuhan = 0;
-                    let xp_bonus = 0;
+                    if(ag.arsip_iuran_map) {
+                        ag.arsip_iuran_map.forEach(ym => { iuranMap[`${ag.id}-${ym}`] = 'archived'; });
+                    }
+                });
+
+                state.anggota.forEach(ag => {
+                    let xp_kepatuhan = ag.hist_talangan_xp || 0; // Penyerapan XP Talangan Masa Lalu
+                    let xp_bonus = ag.hist_xp_bonus || 0; // Penyerapan XP Donasi Masa Lalu
                     let current_arrears = 0;
 
                     let jY = parseInt(ag.join_year) || 2000;
                     let jB = parseInt(ag.join_bln) || 1;
                     let joinAbsM = (jY * 12) + jB;
 
-                    // 1. XP Talangan (Hard-Cap Maks 5x per tahun = 500 XP)
+                    // 1. XP Talangan Berjalan
                     for (let y = jY; y <= currY; y++) {
                         let talanganCount = talanganMap[`${ag.id}-${y}`] || 0;
                         let cappedTalangan = Math.min(talanganCount, 5); 
                         xp_kepatuhan += cappedTalangan * 100;
                     }
 
-                    // 2. Mesin Evaluasi Iuran Mutlak (Time-Decay Penalty)
-                    // Cek hingga 12 bulan ke depan untuk mengakomodir Advance Payer
+                    // 2. Mesin Evaluasi Iuran Mutlak (Tahan Banting terhadap Cut-Off)
                     for (let absM = joinAbsM; absM <= currAbsM + 12; absM++) { 
                         let y = Math.floor((absM - 1) / 12);
                         let m = ((absM - 1) % 12) + 1;
                         let trx = iuranMap[`${ag.id}-${y}-${m}`];
 
-                        if (absM < currAbsM) { // Masa lalu (Potensi Nunggak/Telat)
+                        if (absM < currAbsM) { // Masa lalu
                             if (!trx) {
                                 current_arrears++;
-                                xp_kepatuhan -= 75; // Mutlak hukuman nunggak
+                                xp_kepatuhan -= 75; // Mutlak hukuman nunggak menembus batas arsip
                             } else {
-                                let tTs = new Date(trx.ts);
-                                let trxAbsM = (tTs.getFullYear() * 12) + (tTs.getMonth() + 1);
-                                let delay = trxAbsM - absM;
+                                if (trx === 'archived') {
+                                    xp_kepatuhan += 50; // Arsip mutlak dianggap On-Time (+50 XP)
+                                } else {
+                                    let tTs = new Date(trx.ts);
+                                    let trxAbsM = (tTs.getFullYear() * 12) + (tTs.getMonth() + 1);
+                                    let delay = trxAbsM - absM;
 
-                                if (delay <= -1) xp_kepatuhan += 75;      // Advance (Lebih Awal)
-                                else if (delay === 0) xp_kepatuhan += 50; // On Time
-                                else if (delay === 1) xp_kepatuhan += 25; // Telat 1 Bulan
-                                else if (delay === 2) xp_kepatuhan += 15; // Telat 2 Bulan
-                                else if (delay === 3) xp_kepatuhan += 5;  // Telat 3 Bulan
-                                else xp_kepatuhan += 1;                   // Telat > 3 Bulan (Batas Dasar)
+                                    if (delay <= -1) xp_kepatuhan += 75;
+                                    else if (delay === 0) xp_kepatuhan += 50;
+                                    else if (delay === 1) xp_kepatuhan += 25;
+                                    else if (delay === 2) xp_kepatuhan += 15;
+                                    else if (delay === 3) xp_kepatuhan += 5;
+                                    else xp_kepatuhan += 1;
+                                }
                             }
                         } else if (absM === currAbsM) { // Bulan Berjalan Saat Ini
                             if (trx) {
@@ -1549,12 +1580,12 @@
                                 if (delay <= -1) xp_kepatuhan += 75; 
                                 else xp_kepatuhan += 50; 
                             }
-                        } else { // Bulan Depan (Masa Depan)
-                            if (trx) xp_kepatuhan += 75; // Advance Payment Penuh
+                        } else { // Bulan Depan
+                            if (trx) xp_kepatuhan += 75; 
                         }
                     }
 
-                    // 3. XP Donasi (Sistem Proporsional Bonus)
+                    // 3. XP Donasi (Sistem Proporsional Bonus Berjalan)
                     for (let y = jY; y <= currY; y++) {
                         for (let m = 1; m <= 12; m++) {
                             let donasiBulanIni = donasiMap[`${ag.id}-${y}-${m}`] || 0;
@@ -1565,10 +1596,7 @@
                         }
                     }
                     
-                    // 4. THE DORMANT WEALTH SYSTEM (Gembok Integritas Pay-To-Win)
-                    if (current_arrears >= 3) {
-                        xp_bonus = 0; // Hukuman Sultan Nunggak: Semua Donasi Dianggap Nol.
-                    }
+                    if (current_arrears >= 3) xp_bonus = 0; // Hukuman Sultan Nunggak
 
                     ag.xp_total = xp_kepatuhan + xp_bonus;
                     ag.is_deficit = ag.xp_total < 0;
@@ -1799,8 +1827,18 @@
                 if(isProcessingTransaction) return;
                 
                 let tCek = state.trx.find(t => t.id === id);
-                if (tCek && (tCek.kat === 'Transfer Internal' || tCek.kat === 'Uang Muka Kegiatan' || tCek.kat === 'Sisa Uang Muka')) {
-                    return showToast("TOLAK: Mutasi ini bagian dari Transfer Internal/Kepanitiaan dan terikat. Gunakan menu Program untuk penyelesaian!");
+                if (tCek) {
+                    // Proteksi 1: Limbo Loophole (Cegah hapus mutasi di dompet yang sudah diarsipkan)
+                    let dCek = state.dompet.find(d => d.id === (tCek.id_dompet || 'DP-UTAMA'));
+                    if (dCek && dCek.status === 'arsip') {
+                        return showToast("TOLAK (LIMBO PROTECTION): Dompet kas dari mutasi ini sudah ditutup/diarsipkan. Data tidak dapat dimanipulasi!");
+                    }
+                    
+                   // Proteksi 2: Accounting Deadlock (Double-Entry Shield Mutlak)
+                    let isTerikat = (tCek.kat === 'Transfer Internal' || tCek.kat === 'Uang Muka Kegiatan' || tCek.kat === 'Sisa Uang Muka');
+                    if (isTerikat) {
+                        return showToast("TOLAK: Mutasi ini adalah sistem Ganda (Double-Entry) Kepanitiaan. Dilarang dihapus manual agar kas tidak selisih/bocor!");
+                    }
                 }
 
                 if(typeof openConfirm === 'function') {
@@ -2064,6 +2102,17 @@
                         if (t.year === y) iuranMap[`${t.id_anggota}-${t.bln}`] = t.id;
                     }
                 });
+                
+                // SURGICAL FIX: Injeksi Kapsul Waktu ke Heatmap Kalender Publik
+                state.anggota.forEach(ag => {
+                    if (ag.arsip_iuran_map) {
+                        ag.arsip_iuran_map.forEach(ym => {
+                            iuranMapGlobal[`${ag.id}-${ym}`] = true;
+                            let parts = ym.split('-');
+                            if (parseInt(parts[0]) === y) iuranMap[`${ag.id}-${parts[1]}`] = 'archived';
+                        });
+                    }
+                });
 
                 const tNow = new Date();
                 const currYearReal = tNow.getFullYear();
@@ -2178,6 +2227,9 @@
                                 if (isBeforeJoin && !idTrx) {
                                     cls = 'na'; 
                                     gridHtml += `<div class="i-cell ${cls} no-select" onclick="showToast('Bukan anggota pada bulan ini.')">${bNames[i-1]}</div>`;
+                                } else if (idTrx === 'archived') {
+                                    // SURGICAL FIX: Data Arsip Kebal Manipulasi
+                                    gridHtml += `<div class="i-cell paid no-select" onclick="showToast('Data tahun lalu telah dikunci oleh Tutup Buku.')">${bNames[i-1]}</div>`;
                                 } else {
                                     cls = idTrx ? 'paid' : '';
                                     gridHtml += `<div class="i-cell ${cls} no-select" onclick="toggleBayarIuran('${ag.id}', ${i}, ${y}, '${idTrx || ''}')">${bNames[i-1]}</div>`;
@@ -2484,13 +2536,22 @@
                 <div style="position: absolute; bottom: -50px; right: -50px; width: 150px; height: 150px; background: rgba(16, 185, 129, 0.15); filter: blur(30px); border-radius: 50%;"></div>
                 
                 <input type="file" id="logo-upload" accept="image/*" class="hidden" onchange="handleLogoUpload(event)">
-                <div class="logo-wrapper kiosk-hide" style="margin-bottom: 12px; position: relative; z-index: 2; display: flex; justify-content: center;" onclick="document.getElementById('logo-upload').click()" title="Ketuk untuk mengubah logo">
-                    <img src="icon-512.png" alt="Logo Navasena" class="prof-logo-img" id="prof-logo-img" onerror="this.style.display='none'; document.getElementById('prof-logo-fb').style.display='flex';" style="filter: drop-shadow(0 15px 35px rgba(0,0,0,0.8)); transform: scale(1.05); margin-bottom: 0;">
-                    <div class="prof-logo-fallback" id="prof-logo-fb" style="display:none; border: 4px solid rgba(56, 189, 248, 0.5); color: #1E3A8A; background: #FFFFFF; box-shadow: 0 15px 35px rgba(0,0,0,0.5); margin-bottom: 0;">N</div>
+                <div class="logo-wrapper kiosk-hide" style="margin-bottom: 20px; position: relative; z-index: 2; display: flex; justify-content: center;" onclick="document.getElementById('logo-upload').click()" title="Ketuk untuk mengubah logo">
+                    <!-- SURGICAL FIX: Cincin Holografik & mix-blend-mode untuk memusnahkan background hitam -->
+                    <div style="width: 140px; height: 140px; background: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%); border-radius: 50%; padding: 3px; box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);">
+                        <div style="background: #0F172A; width: 100%; height: 100%; border-radius: 50%; display: flex; align-items: center; justify-content: center; overflow: hidden; border: 1px solid rgba(255,255,255,0.2);">
+                            <img src="icon-512.png" alt="Logo Navasena" class="prof-logo-img" id="prof-logo-img" onerror="this.style.display='none'; document.getElementById('prof-logo-fb').style.display='flex';" style="width: 75%; height: 75%; object-fit: contain; margin: 0; mix-blend-mode: screen; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5)); transform: none;">
+                            <div class="prof-logo-fallback" id="prof-logo-fb" style="display:none; width: 100%; height: 100%; border: none; margin: 0; align-items: center; justify-content: center;">N</div>
+                        </div>
+                    </div>
                 </div>
-                <div class="guest-only" style="margin-bottom: 12px; position: relative; z-index: 2; display: flex; justify-content: center;">
-                    <img src="icon-512.png" alt="Logo Navasena" class="prof-logo-img guest-logo-img" onerror="this.style.display='none'; document.getElementById('guest-logo-fb').style.display='flex';" style="filter: drop-shadow(0 15px 35px rgba(0,0,0,0.8)); transform: scale(1.05); margin-bottom: 0;">
-                    <div class="prof-logo-fallback guest-logo-fb" id="guest-logo-fb" style="display:none; border: 4px solid rgba(56, 189, 248, 0.5); color: #1E3A8A; background: #FFFFFF; box-shadow: 0 15px 35px rgba(0,0,0,0.5); margin-bottom: 0;">N</div>
+                <div class="guest-only" style="margin-bottom: 20px; position: relative; z-index: 2; display: flex; justify-content: center;">
+                    <div style="width: 140px; height: 140px; background: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%); border-radius: 50%; padding: 3px; box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);">
+                        <div style="background: #0F172A; width: 100%; height: 100%; border-radius: 50%; display: flex; align-items: center; justify-content: center; overflow: hidden; border: 1px solid rgba(255,255,255,0.2);">
+                            <img src="icon-512.png" alt="Logo Navasena" class="prof-logo-img guest-logo-img" onerror="this.style.display='none'; document.getElementById('guest-logo-fb').style.display='flex';" style="width: 75%; height: 75%; object-fit: contain; margin: 0; mix-blend-mode: screen; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5)); transform: none;">
+                            <div class="prof-logo-fallback guest-logo-fb" id="guest-logo-fb" style="display:none; width: 100%; height: 100%; border: none; margin: 0; align-items: center; justify-content: center;">N</div>
+                        </div>
+                    </div>
                 </div>
              
                 <div style="margin-top: 0; width: 100%; position: relative; z-index: 2;">
@@ -2616,7 +2677,7 @@
                 </button>
             </div>
 
-            <!-- DEVELOPER SIGNATURE & MEDIA SOSIAL -->
+           <!-- DEVELOPER SIGNATURE & MEDIA SOSIAL -->
             <div class="developer-wrapper">
                 <style>
                     @import url('https://fonts.cdnfonts.com/css/nasalization-2');
@@ -2625,8 +2686,9 @@
                         font-weight: 400;
                     }
                 </style>
-                <div class="no-select" style="margin-top: 40px; margin-bottom: 24px; padding: 24px; background: transparent; text-align: center;">
+                <div class="no-select" style="margin-top: 12px; margin-bottom: 24px; padding: 12px 24px; background: transparent; text-align: center;">
                     <div style="display: inline-flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 20px; width: 100%;">
+
                         <div style="flex: 1; height: 1px; background: linear-gradient(90deg, transparent, #CBD5E1);"></div>
                         <div style="font-size: 8.5px; font-weight: 900; color: #94A3B8; letter-spacing: 4px; text-transform: uppercase;">DEVELOPED BY</div>
                         <div style="flex: 1; height: 1px; background: linear-gradient(270deg, transparent, #CBD5E1);"></div>
@@ -2986,11 +3048,12 @@
 
         <!-- SECURITY & IDENTITY MODALS (BENTO UI) -->
         <div id="mod-identity" class="modal" style="background: rgba(2, 6, 23, 0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); z-index: 99999;">
-            <div class="modal-box no-select" style="overflow: visible; margin-top: 80px; background: linear-gradient(180deg, #1E293B 0%, #0F172A 100%); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 28px; text-align: center; max-width: 340px; display: flex; flex-direction: column; align-items: center; padding: 60px 24px 24px 24px; position: relative; box-shadow: 0 40px 80px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.1);">
+            <div class="modal-box no-select" style="overflow: visible; margin-top: 25px; background: linear-gradient(180deg, #1E293B 0%, #0F172A 100%); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 28px; text-align: center; max-width: 340px; display: flex; flex-direction: column; align-items: center; padding: 60px 24px 24px 24px; position: relative; box-shadow: 0 40px 80px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.1);">
                 <div style="position: absolute; top: -65px; left: 50%; transform: translateX(-50%); width: 140px; height: 140px; background: rgba(59, 130, 246, 0.3); filter: blur(25px); border-radius: 50%; z-index: 0;"></div>
                 <div style="position: absolute; top: -60px; left: 50%; transform: translateX(-50%); width: 120px; height: 120px; background: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%); border-radius: 50%; padding: 3px; box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6); z-index: 1;">
                     <div style="background: #0F172A; width: 100%; height: 100%; border-radius: 50%; display: flex; align-items: center; justify-content: center; overflow: hidden; border: 1px solid rgba(255,255,255,0.2);">
-                        <img src="icon-512.png" alt="Logo" style="width: 100%; height: 100%; object-fit: contain; transform: scale(1.15); filter: drop-shadow(0 6px 12px rgba(0,0,0,0.7));" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        <!-- SURGICAL FIX: width 75% agar tidak full, mix-blend-mode untuk memusnahkan background hitam -->
+                        <img src="icon-512.png" alt="Logo" style="width: 75%; height: 75%; object-fit: contain; mix-blend-mode: screen; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5));" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                         <div style="display:none; font-weight: 900; font-size: 58px; color: #38BDF8;">N</div>
                     </div>
                 </div>
@@ -3292,10 +3355,11 @@
                 let tLahir = (tlTgl > 0 && tlBln > 0 && tlThn > 0) ? `${tlThn}-${tlBln}-${tlTgl}` : '';
                 
                 let gDarah = document.getElementById('ang-goldarah').value;
-                let jBln = parseInt(document.getElementById('ang-join-bln-val').value) || 1; 
-                let jThn = parseInt(document.getElementById('ang-join-thn').value) || new Date().getFullYear();
+                let jBln = parseInt(document.getElementById('ang-join-bln-val').value, 10) || 1; 
+                let jThn = parseInt(document.getElementById('ang-join-thn').value, 10) || new Date().getFullYear();
 
                 if(!n) return showToast("Gagal: Nama tidak boleh kosong.");
+
                 if(!jThn || jThn < 2000) return showToast("Gagal: Tahun gabung tidak valid.");
                 if(w.startsWith('0')) w = '62' + w.substring(1); else if(w.startsWith('8')) w = '62' + w;
                 
@@ -3305,13 +3369,25 @@
                 let id = document.getElementById('ang-id').value || genID('AG');
                 let isEdit = document.getElementById('ang-id').value !== '';
                 
-                let existingBadges = [];
+                let oldAgData = {};
                 if (isEdit) {
                     let oldAg = state.anggota.find(a => a.id === id);
-                    if (oldAg && oldAg.badges) existingBadges = oldAg.badges;
+                    if (oldAg) oldAgData = oldAg; // Amankan seluruh entitas Kapsul Waktu
                 }
                 
-                let ag = { id: id, nama: n, wa: w, label: lbl, tgl_lahir: tLahir, gol_darah: gDarah, join_bln: jBln, join_year: jThn, badges: existingBadges };
+                // SURGICAL FIX: Spread Operator (...) memastikan sejarah transaksi, XP, dan Rewind selamat dari pemusnahan
+                let ag = { 
+                    ...oldAgData, 
+                    id: id, 
+                    nama: n, 
+                    wa: w, 
+                    label: lbl, 
+                    tgl_lahir: tLahir, 
+                    gol_darah: gDarah, 
+                    join_bln: jBln, 
+                    join_year: jThn, 
+                    badges: oldAgData.badges || [] 
+                };
                 
                 try {
                     await saveStore('anggota', ag);
@@ -3338,17 +3414,23 @@
                 if(!ag) return;
                 document.getElementById('ang-id').value = ag.id;
                 document.getElementById('ang-nama').value = ag.nama;
-                document.getElementById('ang-wa').value = ag.wa || '';
+                
+                // SURGICAL FIX: Paksa casting ke String mutlak untuk menghindari TypeError (JSON Number Parsing)
+                let phoneVal = String(ag.wa || '');
+                if(phoneVal.startsWith('62')) phoneVal = phoneVal.substring(2);
+                document.getElementById('ang-wa').value = phoneVal;
+                
                 document.getElementById('ang-label').value = ag.label || '';
                 
                 if (ag.tgl_lahir) {
                     let parts = ag.tgl_lahir.split('-');
                     if (parts.length === 3) {
                         document.getElementById('ang-tl-thn').value = parts[0];
-                        document.getElementById('ang-tl-bln-val').value = parseInt(parts[1]).toString();
+                        // SURGICAL FIX: Injeksi Radix 10 mutlak untuk menghindari Octal Trap (08 & 09)
+                        document.getElementById('ang-tl-bln-val').value = parseInt(parts[1], 10).toString();
                         const bNamesShort = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Ags','Sep','Okt','Nov','Des'];
-                        document.getElementById('ang-tl-bln-btn').innerText = bNamesShort[parseInt(parts[1])-1];
-                        document.getElementById('ang-tl-tgl').value = parseInt(parts[2]).toString();
+                        document.getElementById('ang-tl-bln-btn').innerText = bNamesShort[parseInt(parts[1], 10)-1];
+                        document.getElementById('ang-tl-tgl').value = parseInt(parts[2], 10).toString();
                     }
                 } else {
                     document.getElementById('ang-tl-tgl').value = '';
@@ -3363,14 +3445,20 @@
                 let editBln = (ag.join_bln || 1).toString();
                 document.getElementById('ang-join-bln-val').value = editBln;
                 const bNamesFull = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
-                document.getElementById('ang-join-bln-btn').innerText = bNamesFull[parseInt(editBln)-1];
+                document.getElementById('ang-join-bln-btn').innerText = bNamesFull[parseInt(editBln, 10)-1];
                 document.getElementById('ang-join-thn').value = ag.join_year || new Date().getFullYear();
                 
                 document.getElementById('btn-save-ang').innerText = 'Perbarui Data';
                 document.getElementById('btn-cancel-ang').style.display = 'block';
                 
                 switchAnggotaTab('form'); // Auto-pindah ke tab form
-                document.querySelector('#mod-anggota .modal-box > div:nth-child(2)').scrollTo({top: 0, behavior: 'smooth'}); 
+                
+                // SURGICAL FIX: Asuransi Scroll Fallback untuk WebKit lawas yang menolak Object Smooth Scroll
+                let scrollArea = document.querySelector('#mod-anggota .modal-box > div:nth-child(2)');
+                if (scrollArea) {
+                    try { scrollArea.scrollTo({top: 0, behavior: 'smooth'}); } 
+                    catch(e) { scrollArea.scrollTop = 0; }
+                }
             }
 
             function resetAnggotaForm() {
@@ -3958,7 +4046,13 @@
                 // SURGICAL FIX: Cek seluruh riwayat transaksi mutlak, termasuk yang berada di keranjang sampah.
                 let inUse = state.trx.some(t => t.id_dompet === id);
                 if(inUse) return showToast("TOLAK: Dompet ini sudah memiliki riwayat saldo/mutasi (Bahkan jika di keranjang sampah). Tidak dapat dihapus demi integritas akuntansi!");
+                
+                // SURGICAL FIX: The Black Hole Protection
+                let isUsedInEvent = state.event.some(e => e.id_dompet_default === id);
+                if(isUsedInEvent) return showToast("TOLAK: Dompet ini masih terikat sebagai Dompet Default pada suatu Program Acara. Ubah/Arsipkan dulu acara tersebut!");
+
                 openConfirm("Hapus Dompet Kas?", "Dompet ini akan dihapus secara permanen.", "danger", async () => {
+
                     try {
                         await deleteStore('dompet', id);
                         state.dompet = state.dompet.filter(d => d.id !== id);
@@ -4537,12 +4631,17 @@
                 if(hasActiveEvents) return showToast("TOLAK: Arsipkan semua Program/Acara aktif dahulu agar akuntansi tidak terputus!");
 
                 let currY = new Date().getFullYear();
-                let oldTrxAll = state.trx.filter(t => (t.year || new Date(t.ts).getFullYear()) < currY && t.status !== 'pending' && t.status !== 'talangan' && t.tipe !== 'iuran' && !t.id_event);
+                
+                // SURGICAL FIX: The Absolute Zero-Bloat Target (Membersihkan SEMUA masa lalu)
+                let pendingPast = state.trx.filter(t => (t.year || new Date(t.ts).getFullYear()) < currY && !t.is_deleted && (t.status === 'pending' || t.status === 'talangan'));
+                if(pendingPast.length > 0) return showToast("TOLAK: Ada Uang Muka/Talangan di tahun lama yang belum lunas. Selesaikan dulu!");
+
+                let oldTrxAll = state.trx.filter(t => (t.year || new Date(t.ts).getFullYear()) < currY);
                 let oldTrxValid = oldTrxAll.filter(t => !t.is_deleted);
                 
-                if(oldTrxValid.length === 0) return showToast(`Tidak ada mutasi Lunas sebelum tahun ${currY} yang perlu ditutup.`);
+                if(oldTrxValid.length === 0) return showToast(`Tidak ada mutasi sebelum tahun ${currY} yang perlu ditutup.`);
 
-                openConfirm("TUTUP BUKU TAHUNAN?", `Sistem akan MENGHAPUS ${oldTrxValid.length} mutasi tahun ${currY - 1} ke bawah dan merangkumnya menjadi 'Saldo Awal'. PASTIKAN ANDA SUDAH BACKUP EXCEL!`, "danger", () => {
+                openConfirm("TUTUP BUKU TAHUNAN?", `Sistem akan MENGHAPUS ${oldTrxValid.length} mutasi tahun ${currY - 1} ke bawah beserta arsip Acara, merangkumnya menjadi 'Saldo Awal', dan mengunci Sejarah (Kapsul Waktu). PASTIKAN SUDAH BACKUP EXCEL!`, "danger", () => {
                     currentPinAction = 'cutoff';
                     document.getElementById('kiosk-pin').value = '';
                     document.getElementById('btn-verify-pin').innerText = 'Verifikasi & Tutup Buku';
@@ -4552,18 +4651,56 @@
 
             async function executeCutOffYear() {
                 isProcessingTransaction = true;
-                showToast("Sedang mengompres memori database...");
+                showToast("Sedang mengekstrak Kapsul Waktu & mengompres memori...");
                 try {
                     let currY = new Date().getFullYear();
-                    let oldTrxAll = state.trx.filter(t => (t.year || new Date(t.ts).getFullYear()) < currY && t.status !== 'pending' && t.status !== 'talangan' && t.tipe !== 'iuran' && !t.id_event);
+                    let oldTrxAll = state.trx.filter(t => (t.year || new Date(t.ts).getFullYear()) < currY);
                     let oldTrxValid = oldTrxAll.filter(t => !t.is_deleted);
                     
                     let saldoAwalDompet = {};
+                    let anggotaUpdates = {}; 
+
+                    state.anggota.forEach(a => {
+                        anggotaUpdates[a.id] = {
+                            hist_iuran_rp: a.hist_iuran_rp || 0, hist_donasi_rp: a.hist_donasi_rp || 0,
+                            hist_iuran_count: a.hist_iuran_count || 0, arsip_iuran_map: a.arsip_iuran_map || [],
+                            hist_xp_bonus: a.hist_xp_bonus || 0, hist_talangan_xp: a.hist_talangan_xp || 0
+                        };
+                    });
+
+                    let deletedDonasiMap = {}; let deletedTalanganMap = {};
+
                     oldTrxValid.forEach(t => {
                         let d = t.id_dompet || 'DP-UTAMA';
                         if(!saldoAwalDompet[d]) saldoAwalDompet[d] = 0;
                         if(t.tipe === 'masuk' || t.tipe === 'iuran') saldoAwalDompet[d] += t.nom_final;
-                        if(t.tipe === 'keluar') saldoAwalDompet[d] -= (t.status === 'pending' ? t.nom_awal : t.nom_final);
+                        if(t.tipe === 'keluar') saldoAwalDompet[d] -= t.nom_final;
+
+                        if (t.id_anggota && anggotaUpdates[t.id_anggota]) {
+                            if (t.tipe === 'iuran') {
+                                anggotaUpdates[t.id_anggota].hist_iuran_rp += t.nom_final;
+                                anggotaUpdates[t.id_anggota].hist_iuran_count += 1;
+                                anggotaUpdates[t.id_anggota].arsip_iuran_map.push(`${t.year}-${t.bln}`);
+                            } else if (t.tipe === 'masuk' && t.kat !== 'Transfer Internal' && t.kat !== 'Saldo Awal') {
+                                anggotaUpdates[t.id_anggota].hist_donasi_rp += t.nom_final;
+                                let dY = t.year; let dM = t.bln || (new Date(t.ts).getMonth() + 1);
+                                deletedDonasiMap[`${t.id_anggota}-${dY}-${dM}`] = (deletedDonasiMap[`${t.id_anggota}-${dY}-${dM}`] || 0) + t.nom_final;
+                            } else if ((t.tipe === 'keluar' && t.status === 'talangan') || (t.tipe === 'keluar' && t.status === 'lunas' && t.ket && t.ket.includes('[TALANGAN'))) {
+                                deletedTalanganMap[`${t.id_anggota}-${t.year}`] = (deletedTalanganMap[`${t.id_anggota}-${t.year}`] || 0) + 1;
+                            }
+                        }
+                    });
+
+                    // Konversi XP Masa Lalu agar Abadi
+                    Object.keys(deletedDonasiMap).forEach(key => {
+                        let idAg = key.split('-')[0];
+                        let xpD = Math.floor(deletedDonasiMap[key] / 10000) * 10;
+                        if (anggotaUpdates[idAg]) anggotaUpdates[idAg].hist_xp_bonus += Math.min(xpD, 500);
+                    });
+                    Object.keys(deletedTalanganMap).forEach(key => {
+                        let idAg = key.split('-')[0];
+                        let count = Math.min(deletedTalanganMap[key], 5);
+                        if(anggotaUpdates[idAg]) anggotaUpdates[idAg].hist_talangan_xp += (count * 100);
                     });
 
                     let yearlyXP = [];
@@ -4572,9 +4709,10 @@
                     let top3 = yearlyXP.slice(0, 3).map(x => x.id);
                     
                     await new Promise((resolve, reject) => {
-                        const tx = idb.transaction(['trx', 'anggota'], 'readwrite');
+                        const tx = idb.transaction(['trx', 'anggota', 'event'], 'readwrite');
                         const storeTrx = tx.objectStore('trx');
                         const storeAng = tx.objectStore('anggota');
+                        const storeEvt = tx.objectStore('event');
                         
                         state.anggota.forEach(ag => {
                             let agUpdate = {...ag};
@@ -4582,9 +4720,20 @@
                             if (top3[0] === ag.id && ag.xp_total > 0) agUpdate.badges.push(`👑 Champion ${currY-1}`);
                             else if (top3[1] === ag.id && ag.xp_total > 0) agUpdate.badges.push(`🥈 Runner-Up ${currY-1}`);
                             else if (top3[2] === ag.id && ag.xp_total > 0) agUpdate.badges.push(`🥉 Elite ${currY-1}`);
+                            
+                            // Injeksi Permanen Kapsul Waktu
+                            agUpdate.hist_iuran_rp = anggotaUpdates[ag.id].hist_iuran_rp;
+                            agUpdate.hist_donasi_rp = anggotaUpdates[ag.id].hist_donasi_rp;
+                            agUpdate.hist_iuran_count = anggotaUpdates[ag.id].hist_iuran_count;
+                            agUpdate.arsip_iuran_map = anggotaUpdates[ag.id].arsip_iuran_map;
+                            agUpdate.hist_xp_bonus = anggotaUpdates[ag.id].hist_xp_bonus;
+                            agUpdate.hist_talangan_xp = anggotaUpdates[ag.id].hist_talangan_xp;
+
                             storeAng.put(agUpdate);
                         });
 
+                        // Sapu Bersih Arsip Program (Meringankan Memori)
+                        state.event.filter(e => e.status === 'arsip').forEach(e => storeEvt.delete(e.id));
                         oldTrxAll.forEach(t => storeTrx.delete(t.id));
                         
                         Object.keys(saldoAwalDompet).forEach(d => {
@@ -4615,7 +4764,7 @@
 
         <!-- MODAL BUKU PANDUAN -->
         <div id="mod-tutorial" class="modal">
-            <div class="modal-box no-select" style="padding: 0; background: #F8FAFC; max-width: 720px; width: 95vw; border-radius: 24px; box-shadow: var(--shadow-lg); display: flex; flex-direction: column; overflow: hidden; height: 85vh; max-height: calc(100% - 20px);">
+            <div class="modal-box no-select" style="padding: 0; background: #F8FAFC; max-width: 720px; width: 95vw; border-radius: 24px; box-shadow: var(--shadow-lg); display: flex; flex-direction: column; overflow: hidden; max-height: 85vh;">
                 <div style="background: linear-gradient(135deg, #1E3A8A 0%, #0F172A 100%); padding: 20px 24px; color: white; position: relative; border-bottom: 3px solid #D97706; display: flex; align-items: center; gap: 16px; flex-shrink: 0; z-index: 10;">
                     <div style="background: rgba(255,255,255,0.1); width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.3); box-shadow: 0 4px 10px rgba(0,0,0,0.2); flex-shrink: 0;">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FBBF24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
@@ -4629,7 +4778,7 @@
                     </button>
                 </div>
                 
-                   <div style="flex: 1 1 auto; overflow-y: auto; height: 0; padding: 24px 24px 40px 24px; -webkit-overflow-scrolling: touch;">                    <div id="sop-admin" style="display: block;">
+                   <div style="flex: 1 1 auto; overflow-y: auto; min-height: 0; padding: 24px 24px 40px 24px; -webkit-overflow-scrolling: touch;">                    <div id="sop-admin" style="display: block;">
 
                         <div style="background: #FEF2F2; border-left: 5px solid #DC2626; padding: 16px; margin-bottom: 24px; border-radius: 12px; box-shadow: 0 4px 12px rgba(220, 38, 38, 0.08); display: flex; gap: 12px; align-items: flex-start;">
                             <div style="background: #DC2626; color: white; width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px;">
@@ -4876,17 +5025,164 @@
                                             <li style="margin-bottom: 8px;"><b>Kotak Suara (Aspirasi Rahasia):</b> Perhatikan tombol merah melayang berbentuk kotak pesan <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="display:inline-block; vertical-align:middle; transform:translateY(-1px); margin:0 2px;"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg> di pojok kiri bawah layar Anda. Sentuh tombol tersebut untuk mengirimkan saran, teguran, atau laporan penyalahgunaan. Sistem ini menerapkan Enkripsi Anonim sehingga identitas (Nama/Device) Anda tidak akan pernah diketahui oleh siapapun, termasuk Bendahara yang menerima pesan tersebut.</li>
                                             <li><b>Portal Login:</b> Jika Anda merupakan Anggota resmi organisasi dan nomor WA Anda telah didaftarkan oleh admin, Anda bisa keluar dari halaman Publik ini dengan menyentuh tombol "Keluar" di bagian bawah profil, lalu masuk kembali dengan memverifikasi Nomor WhatsApp Anda untuk membuka KTA Anda sendiri.</li>
                                         </ul>
-                                    </div>
-                                </div>
+                                  </div>
+                               </div>
                             </div>
                         </div>
                     </div>
+                  </div>
+               </div>
+            </div>
+
+            <!-- MODAL KLASEMEN DONASI -->
+            <div id="mod-donasi-list" class="modal">
+                <div class="modal-box" style="background: var(--bg); padding: 0;">
+                    <div style="background: var(--surface); padding: 20px; position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--border); border-radius: 24px 24px 0 0;">
+                        <button class="close-modal" style="top: 16px;" onclick="closeModal('mod-donasi-list')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+                        <h3 style="font-size: 18px; font-weight: 800; display:flex; align-items:center; gap:8px;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Klasemen Donasi</h3>
+                    </div>
+                    <div id="leaderboard-list" style="padding: 20px; max-height: 65vh; overflow-y: auto;"></div>
                 </div>
             </div>
-        </div>
 
-        <!-- MODAL TRANSAKSI KAS UTAMA -->
-        <div id="mod-trx" class="modal">
+            <!-- MODAL SMART LPJ (PENUTUPAN ACARA) -->
+            <div id="mod-smart-lpj" class="modal">
+                <div class="modal-box">
+                    <button class="close-modal" onclick="closeModal('mod-smart-lpj')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+                    <h3 style="margin-bottom: 20px; font-size: 18px; font-weight: 900; color: #1E3A8A;">Tutup LPJ Panitia</h3>
+                    
+                    <input type="hidden" id="slpj-dompet-id">
+                    <input type="hidden" id="slpj-event-id">
+                    <input type="hidden" id="slpj-awal-val">
+
+                    <div style="background: #EFF6FF; border: 1.5px solid #BFDBFE; border-radius: 14px; padding: 16px; margin-bottom: 20px;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+                            <span style="font-size: 11px; font-weight: 800; color: #1E40AF; text-transform: uppercase;">Panitia PJ:</span>
+                            <span id="slpj-nama" style="font-size: 13px; font-weight: 900; color: #1E3A8A;">-</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                            <span style="font-size: 11px; font-weight: 800; color: #1E40AF; text-transform: uppercase;">Dana Dibawa (Awal):</span>
+                            <span id="slpj-awal" style="font-size: 14px; font-weight: 900; color: #1E3A8A;">Rp 0</span>
+                        </div>
+                    </div>
+
+                    <div class="seg-control no-select" style="margin-bottom: 20px;">
+                        <button class="seg-btn active" id="seg-lpj-pas" onclick="toggleSmartLpj('pas')">Pas (Sesuai)</button>
+                        <button class="seg-btn" id="seg-lpj-sisa" onclick="toggleSmartLpj('sisa')">Ada Sisa</button>
+                        <button class="seg-btn" id="seg-lpj-nombok" onclick="toggleSmartLpj('nombok')">Nombok</button>
+                    </div>
+
+                    <div class="form-group" id="wrap-slpj-input" style="display: none; margin-bottom: 24px;">
+                        <label id="lbl-slpj-input" style="font-size: 11px; font-weight: 800; text-transform: uppercase;">NOMINAL <span style="color:var(--danger)">*</span></label>
+                        <input type="tel" id="slpj-input-nom" placeholder="Rp 0" oninput="formatRupiah(this)" style="font-size: 20px; font-weight: 900; height: 50px;">
+                    </div>
+
+                    <button class="btn btn-primary no-select" id="btn-slpj-save" style="width: 100%; padding: 16px; font-size: 14px; font-weight: 900; box-shadow: 0 10px 25px -5px rgba(30, 58, 138, 0.4);" onclick="executeSmartLpj()">EKSEKUSI & TUTUP BUKU</button>
+                </div>
+            </div>
+
+            <!-- MODAL DRILLDOWN TRANSAKSI -->
+            <div id="mod-drilldown" class="modal">
+                <div class="modal-box" style="background: var(--bg); padding: 0;">
+                    <div style="background: var(--surface); padding: 20px; position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--border); border-radius: 24px 24px 0 0;">
+                        <button class="close-modal" style="top: 16px;" onclick="closeModal('mod-drilldown')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+                        <h3 id="drill-title" style="font-size: 16px; font-weight: 900; text-transform: uppercase; color: var(--primary); padding-right: 24px; line-height: 1.4;">RINCIAN DATA</h3>
+                    </div>
+                    <div id="drill-list" style="padding: 20px; max-height: 60vh; overflow-y: auto;"></div>
+                </div>
+            </div>
+
+            <!-- MODAL DONASI RAPID (GOD-MODE) -->
+            <div id="mod-donasi-rapid" class="modal">
+                <div class="modal-box">
+                    <button class="close-modal" onclick="closeModal('mod-donasi-rapid')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+                    <h3 style="margin-bottom: 20px; font-size: 18px; font-weight: 900; color: #059669;">Donasi Program Acara</h3>
+                    
+                    <input type="hidden" id="donasi-event-id">
+
+                    <div class="seg-control no-select" style="margin-bottom: 20px;">
+                        <button class="seg-btn active" id="seg-donasi-warga" onclick="toggleSegDonasi('warga')">Anggota Internal</button>
+                        <button class="seg-btn" id="seg-donasi-luar" onclick="toggleSegDonasi('luar')">Donatur Luar / Umum</button>
+                    </div>
+
+                    <div class="form-group" id="wrap-donasi-warga" style="margin-bottom: 16px;">
+                        <label style="font-size: 11px; font-weight: 800; color: var(--primary); text-transform: uppercase;">Pilih Anggota <span style="color:var(--danger)">*</span></label>
+                        <input type="hidden" id="donasi-warga-val">
+                        <div id="donasi-warga-btn" class="custom-select" style="border-color: var(--primary); color: var(--primary);" onclick="openDonasiMemberSelect()">-- Pilih Nama --</div>
+                    </div>
+
+                    <div class="form-group" id="wrap-donasi-luar" style="display: none; margin-bottom: 16px;">
+                        <label style="font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">Nama Donatur / Instansi <span style="color:var(--danger)">*</span></label>
+                        <input type="text" id="donasi-luar-val" placeholder="Ketik nama donatur luar...">
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: 24px;">
+                        <label style="font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">Nominal Donasi <span style="color:var(--danger)">*</span></label>
+                        <input type="tel" id="donasi-nom" placeholder="Rp 0" oninput="formatRupiah(this)" style="font-size: 24px; font-weight: 900; color: #059669; height: 54px;">
+                    </div>
+
+                    <button class="btn no-select" id="btn-rapid-save" style="width: 100%; padding: 16px; font-size: 14px; font-weight: 900; background: #10B981; color: white; box-shadow: 0 10px 25px -5px rgba(16, 185, 129, 0.4);" onclick="executeDonasiRapid(this)">SIMPAN DONASI</button>
+                </div>
+            </div>
+
+            <!-- MODAL PJ ADVANCE (PENCAIRAN DANA) -->
+            <div id="mod-pj-advance" class="modal">
+                <div class="modal-box">
+                    <button class="close-modal" onclick="closeModal('mod-pj-advance')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+                    <h3 style="margin-bottom: 20px; font-size: 18px; font-weight: 900; color: #1E3A8A;">Cairkan Dana PJ</h3>
+                    
+                    <input type="hidden" id="pj-event-id">
+
+                    <div class="form-group" style="margin-bottom: 16px;">
+                        <label style="font-size: 11px; font-weight: 800; color: var(--primary); text-transform: uppercase;">Pilih Panitia PJ <span style="color:var(--danger)">*</span></label>
+                        <input type="hidden" id="pj-member-val">
+                        <div id="pj-member-btn" class="custom-select" style="border-color: var(--primary); color: var(--primary);" onclick="openPjMemberSelect()">-- Pilih Anggota --</div>
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: 16px;">
+                        <label style="font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">Rincian/Tujuan <span style="color:var(--danger)">*</span></label>
+                        <input type="text" id="pj-ket" placeholder="Contoh: Belanja Konsumsi, MMT, dsb...">
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: 24px;">
+                        <label style="font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">Nominal Cair <span style="color:var(--danger)">*</span></label>
+                        <input type="tel" id="pj-nom" placeholder="Rp 0" oninput="formatRupiah(this)" style="font-size: 24px; font-weight: 900; color: #1E3A8A; height: 54px;">
+                    </div>
+
+                    <button class="btn btn-primary no-select" id="btn-pj-save" style="width: 100%; padding: 16px; font-size: 14px; font-weight: 900; box-shadow: 0 10px 25px -5px rgba(30, 58, 138, 0.4);" onclick="executePjAdvance(this)">CAIRKAN DANA</button>
+                </div>
+            </div>
+
+            <!-- MODAL BLAST QUEUE (WA BLAST) -->
+            <div id="mod-blast-queue" class="modal" style="z-index: 99999; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); background: rgba(15, 23, 42, 0.85);">
+                <div class="modal-box no-select" style="background: linear-gradient(180deg, #1E3A8A 0%, #0F172A 100%); border: 1px solid rgba(255,255,255,0.1); border-radius: 28px; text-align: center; color: white;">
+                    <div style="display: flex; justify-content: center; margin-bottom: 16px;">
+                        <div style="width: 60px; height: 60px; background: rgba(37, 211, 102, 0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(37, 211, 102, 0.4); box-shadow: 0 0 20px rgba(37, 211, 102, 0.3);">
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#25D366" stroke-width="2.5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                        </div>
+                    </div>
+                    <h3 style="font-size: 18px; font-weight: 900; margin-bottom: 8px; letter-spacing: 1px;">SISTEM PENAGIHAN</h3>
+                    <div id="bq-progress" style="font-size: 11px; font-weight: 800; color: #38BDF8; margin-bottom: 24px; text-transform: uppercase; letter-spacing: 2px;">Menagih 1 dari X</div>
+
+                    <div style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 20px; margin-bottom: 24px; text-align: left;">
+                        <div style="font-size: 10px; font-weight: 700; color: #94A3B8; text-transform: uppercase; margin-bottom: 4px;">Target Anggota:</div>
+                        <div id="bq-name" style="font-size: 16px; font-weight: 900; color: #FFFFFF; margin-bottom: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">NAMA</div>
+                        
+                        <div style="font-size: 10px; font-weight: 700; color: #94A3B8; text-transform: uppercase; margin-bottom: 4px;">Rincian Tunggakan:</div>
+                        <div id="bq-utang" style="font-size: 15px; font-weight: 900; color: #EF4444;">Total: Rp 0</div>
+                    </div>
+
+                    <div style="display: flex; gap: 12px; margin-bottom: 12px;">
+                        <button class="btn no-select" style="flex: 1; background: transparent; border: 1.5px solid rgba(255,255,255,0.2); color: white;" onclick="skipBlastQueue()">LEWATI</button>
+                        <button class="btn no-select" style="flex: 2; background: #25D366; color: white; border: none; box-shadow: 0 4px 15px rgba(37,211,102,0.3);" onclick="executeBlastQueue()">KIRIM WHATSAPP</button>
+                    </div>
+                    <button class="btn no-select" style="width: 100%; background: transparent; color: #EF4444; border: none; font-size: 11px;" onclick="closeBlastQueue()">Batalkan Proses</button>
+                </div>
+            </div>
+
+            <!-- MODAL TRANSAKSI KAS UTAMA -->
+            <div id="mod-trx" class="modal">
+
             <div class="modal-box">
                 <button class="close-modal" onclick="closeModal('mod-trx')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
                 <h3 style="margin-bottom: 20px; font-size: 18px; font-weight: 800;">Catat Transaksi Kas</h3>
@@ -4971,6 +5267,104 @@
                 </div>
 
                 <button class="btn no-select" id="btn-exec-settle" style="width: 100%; padding: 16px; font-size: 14px; font-weight: 900; background: linear-gradient(135deg, #FDE68A 0%, #F59E0B 100%); color: #92400E; box-shadow: 0 10px 25px -5px rgba(245, 158, 11, 0.4);" onclick="executeSettle()">Selesaikan & Tutup Buku</button>
+            </div>
+        </div>
+
+        <!-- MODAL PREVIEW KTA (HOLOGRAFIK) -->
+        <div id="mod-kta-preview" class="modal" style="z-index: 99999; backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); background: rgba(2, 6, 23, 0.85);">
+            <div class="modal-box no-select" style="background: transparent; box-shadow: none; padding: 0; display: flex; justify-content: center; align-items: center; overflow: visible;">
+
+                <!-- KTA Card Replicated -->
+                <div class="kta-wrapper" style="width: 100%; max-width: 360px;">
+                    <div id="prev-kta-card-element" class="kta-card deficit-mode" style="margin-bottom: 0; pointer-events: none;">
+                        <!-- SURGICAL FIX: Elegant Close Button Inside Card -->
+                        <button class="close-modal no-select" style="position: absolute; top: 16px; right: 16px; width: 30px; height: 30px; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); color: #FFFFFF; border: 1px solid rgba(255,255,255,0.3); border-radius: 50%; display: flex; align-items: center; justify-content: center; z-index: 20; cursor: pointer; pointer-events: auto; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 4px 10px rgba(0,0,0,0.5);" onclick="closeModal('mod-kta-preview')" onmousedown="this.style.transform='scale(0.85)'" onmouseup="this.style.transform='scale(1)'" ontouchstart="this.style.transform='scale(0.85)'" ontouchend="this.style.transform='scale(1)'">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                        </button>
+                        
+                        <div style="position: absolute; inset: 0; background: rgba(0, 0, 0, 0.4); z-index: 1; border-radius: 20px;"></div>
+                        <div id="prev-kta-rank-shield" class="rank-shield r-afk" style="position:absolute; top: 10px; right: 10px; width:100px; height:100px; z-index:2; filter:drop-shadow(0 15px 25px rgba(0,0,0,0.9)); transform: translateZ(0); transition: background-image 0.5s ease;"></div>
+
+                        <div style="position: relative; z-index: 3; display: flex; flex-direction: column; height: 100%; min-height: 180px; justify-content: space-between;">
+
+                            <div style="font-size: 9px; font-weight: 900; letter-spacing: 2px; color: rgba(255,255,255,0.85); text-transform: uppercase; text-shadow: 0 2px 4px rgba(0,0,0,0.8);">NAVASENA EXECUTIVE PASS</div>
+                            <div style="margin-top: 28px; margin-bottom: 24px; max-width: 65%; overflow: hidden;">
+                                <h2 id="prev-kta-nama" style="font-size: 20px; font-weight: 900; color: #FFFFFF; letter-spacing: -0.5px; line-height: 1.2; text-shadow: 0 4px 12px rgba(0,0,0,0.9); margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-transform: uppercase;">NAMA</h2>
+                                <div id="prev-kta-jabatan" style="font-size: 8.5px; font-weight: 800; color: #FBBF24; text-transform: uppercase; letter-spacing: 1.5px; text-shadow: 0 2px 4px rgba(0,0,0,0.9); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%;">JABATAN</div>
+                            </div>
+
+                            <div style="display: flex; flex-direction: column; gap: 16px;">
+                                <div style="display:flex; gap:10px;">
+                                    <div style="background: rgba(0,0,0,0.4); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.15); padding: 6px 10px; border-radius: 8px; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#38BDF8" stroke-width="3"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                                        <span id="prev-kta-tgl-lahir" style="font-size: 10px; font-weight: 800; color: #E2E8F0; letter-spacing: 0.5px;">-</span>
+                                    </div>
+                                    <div style="background: rgba(0,0,0,0.4); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.15); padding: 6px 10px; border-radius: 8px; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="3"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
+                                        <span id="prev-kta-gol-darah" style="font-size: 10px; font-weight: 900; color: #E2E8F0; letter-spacing: 0.5px;">-</span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div style="display:flex; justify-content:space-between; font-size:10px; font-weight:900; color:#FFFFFF; margin-bottom:6px; text-shadow: 0 2px 6px rgba(0,0,0,0.9); text-transform: uppercase; letter-spacing: 1px;">
+                                        <span id="prev-kta-rank-text">AFK</span>
+                                        <span id="prev-kta-xp-text" style="color: #38BDF8;">0 XP</span>
+                                    </div>
+                                    <div style="width:100%; height:6px; background:rgba(0,0,0,0.6); border-radius:3px; overflow:hidden; border: 1px solid rgba(255,255,255,0.1); position: relative;">
+                                        <div id="prev-kta-xp-bar" style="height:100%; width:0%; background:linear-gradient(90deg, #38BDF8, #FFFFFF); border-radius:3px; transition:width 0.8s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL NAVASENA REWIND -->
+        <div id="mod-rewind" class="modal" style="z-index: 99998; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); background: rgba(15, 23, 42, 0.8);">
+            <div class="modal-box no-select" style="background: linear-gradient(180deg, #0F172A 0%, #1E293B 100%); border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 20px 40px rgba(0,0,0,0.6);">
+                <button class="close-modal" style="background: rgba(255,255,255,0.05); color: #94A3B8; border: 1px solid rgba(255,255,255,0.1); top: 20px; right: 20px;" onclick="closeModal('mod-rewind')">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+
+                <div style="text-align: center; margin-bottom: 24px; margin-top: 10px;">
+                    <div style="display: inline-flex; align-items: center; justify-content: center; width: 60px; height: 60px; background: rgba(56, 189, 248, 0.1); border-radius: 50%; margin-bottom: 12px; border: 1px solid rgba(56, 189, 248, 0.2); box-shadow: 0 0 20px rgba(56, 189, 248, 0.2);">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#38BDF8" stroke-width="2.5"><polygon points="11 19 2 12 11 5 11 19"/><polygon points="22 19 13 12 22 5 22 19"/></svg>
+                    </div>
+                    <h3 style="font-size: 18px; font-weight: 900; color: #FFFFFF; letter-spacing: 1px; text-transform: uppercase;">NAVASENA REWIND</h3>
+                    <p style="font-size: 11px; color: #94A3B8; font-weight: 600; margin-top: 4px;">Rekam Jejak Kontribusi Finansial Anda</p>
+                </div>
+
+                <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.05); border-radius: 16px; padding: 20px; margin-bottom: 16px; position: relative; overflow: hidden;">
+                    <div style="position: absolute; right: -20px; bottom: -20px; opacity: 0.05; transform: scale(1.5);">
+                        <svg width="100" height="100" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+                    </div>
+                    <div style="font-size: 10px; font-weight: 800; color: #38BDF8; text-transform: uppercase; margin-bottom: 4px; letter-spacing: 1px; position: relative; z-index: 2;">Total Sumbangsih Kas</div>
+                    <div id="rw-kas-total" style="font-size: 28px; font-weight: 900; color: #FFFFFF; letter-spacing: -1px; text-shadow: 0 4px 10px rgba(0,0,0,0.5); position: relative; z-index: 2;">Rp 0</div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px;">
+                    <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); border-radius: 14px; padding: 16px;">
+                        <div style="font-size: 9px; font-weight: 800; color: #94A3B8; text-transform: uppercase; margin-bottom: 6px;">Total Iuran Wajib</div>
+                        <div id="rw-kas-iuran" style="font-size: 15px; font-weight: 900; color: #34D399;">Rp 0</div>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); border-radius: 14px; padding: 16px;">
+                        <div style="font-size: 9px; font-weight: 800; color: #94A3B8; text-transform: uppercase; margin-bottom: 6px;">Donasi Khusus</div>
+                        <div id="rw-kas-donasi" style="font-size: 15px; font-weight: 900; color: #FBBF24;">Rp 0</div>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); border-radius: 14px; padding: 16px;">
+                        <div style="font-size: 9px; font-weight: 800; color: #94A3B8; text-transform: uppercase; margin-bottom: 6px;">Akurasi Kepatuhan</div>
+                        <div id="rw-acc" style="font-size: 18px; font-weight: 900; color: #FFFFFF;">0%</div>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); border-radius: 14px; padding: 16px;">
+                        <div style="font-size: 9px; font-weight: 800; color: #94A3B8; text-transform: uppercase; margin-bottom: 6px;">Program Didanai</div>
+                        <div id="rw-event" style="font-size: 18px; font-weight: 900; color: #FFFFFF;">0 Acara</div>
+                    </div>
+                </div>
+
+                <button class="btn no-select" style="width: 100%; padding: 16px; font-size: 13px; font-weight: 900; background: rgba(56, 189, 248, 0.1); color: #38BDF8; border: 1px solid rgba(56, 189, 248, 0.3); box-shadow: none; border-radius: 12px; transition: 0.2s;" onmousedown="this.style.background='rgba(56, 189, 248, 0.2)'" onmouseup="this.style.background='rgba(56, 189, 248, 0.1)'" onclick="closeModal('mod-rewind')">
+                    TUTUP REWIND
+                </button>
             </div>
         </div>
 
@@ -6038,14 +6432,17 @@
                 let ag = state.anggota.find(a => a.id === idAg);
                 if(!ag) return showToast("Gagal memuat profil anggota.");
 
-                let totalIuranWajib = 0; let totalDonasiSukarela = 0;
-                let compliantMonths = 0; let fundedEvents = new Set();
-                let iuranSet = new Set();
+                // SURGICAL FIX: Penyerapan Kapsul Waktu (Historical Data)
+                let totalIuranWajib = ag.hist_iuran_rp || 0; 
+                let totalDonasiSukarela = ag.hist_donasi_rp || 0;
+                let compliantMonths = ag.hist_iuran_count || 0; 
+                let fundedEvents = new Set();
                 
                 state.trx.forEach(t => {
                     if (t.is_deleted || t.id_anggota !== idAg) return;
                     if (t.tipe === 'iuran') {
-                        totalIuranWajib += t.nom_final; iuranSet.add(`${t.year}-${t.bln}`);
+                        totalIuranWajib += t.nom_final; 
+                        compliantMonths++; // Bulan berjalan
                     } else if (t.tipe === 'masuk') {
                         if (t.kat !== 'Transfer Internal' && t.kat !== 'Saldo Awal' && !(t.kat || '').includes('Koreksi Saldo')) {
                             totalDonasiSukarela += t.nom_final;
@@ -6054,27 +6451,22 @@
                     }
                 });
 
+                // SURGICAL FIX: Absolute Temporal Formula untuk Akurasi Kepatuhan Abadi
                 let tNow = new Date(); let currY = tNow.getFullYear(); let currM = tNow.getMonth() + 1;
                 let jY = parseInt(ag.join_year) || 2000; let jB = parseInt(ag.join_bln) || 1;
-                let totalObligation = 0;
                 
-                for(let y = jY; y <= currY; y++) {
-                    let startM = (y === jY) ? jB : 1;
-                    let endM = (y === currY) ? currM : 12;
-                    if(endM >= startM) {
-                        for(let m = startM; m <= endM; m++) {
-                            totalObligation++;
-                            if(iuranSet.has(`${y}-${m}`)) compliantMonths++;
-                        }
-                    }
-                }
+                let totalObligation = ((currY - jY) * 12) + (currM - jB) + 1;
+                if (totalObligation < 1) totalObligation = 1;
                 
-                let accPct = totalObligation > 0 ? Math.round((compliantMonths / totalObligation) * 100) : 100;
+                // Mengakomodir Advance Payer agar menembus 100% secara logika, bukan potong UI.
+                if (compliantMonths > totalObligation) totalObligation = compliantMonths; 
+                
+                let accPct = Math.round((compliantMonths / totalObligation) * 100);
                 
                 document.getElementById('rw-kas-total').innerText = 'Rp ' + fmtRp(totalIuranWajib + totalDonasiSukarela);
                 document.getElementById('rw-kas-iuran').innerText = 'Rp ' + fmtRp(totalIuranWajib);
                 document.getElementById('rw-kas-donasi').innerText = 'Rp ' + fmtRp(totalDonasiSukarela);
-                document.getElementById('rw-acc').innerText = Math.min(100, accPct) + '%';
+                document.getElementById('rw-acc').innerText = accPct + '%';
                 document.getElementById('rw-event').innerText = fundedEvents.size + ' Program';
 
                 openModal('mod-rewind'); pulseHaptic('light');
@@ -6343,15 +6735,15 @@
                 }, 30000); 
             }
 
-let scrollTimeout;
+            let scrollTimeout;
             document.addEventListener('scroll', () => {
                 if (!scrollTimeout) {
                     scrollTimeout = setTimeout(() => {
                         resetIdleTimer();
                         scrollTimeout = null;
-                    }, 200); // Eksekusi hanya setiap 200ms
+                    }, 200);
                 }
-            }, {passive: true});
+            }, true); // Gunakan 'true' (Capture Phase) agar tembus membaca pergerakan body
 
             ['touchstart', 'click'].forEach(evt => 
                 document.addEventListener(evt, () => { resetIdleTimer(); }, {passive: true})
