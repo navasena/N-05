@@ -4,7 +4,7 @@
  * Protection: Opaque Quota Shield, Thread Lockdown GC, Fault-Tolerant Pre-Caching
  */
 
-const APP_VERSION = '1.5'; // Versi final, akan memicu pemusnahan memori lama
+const APP_VERSION = '1.6'; // Versi final, akan memicu pemusnahan memori lama
 const CACHE_PREFIX = 'portal-navasena-';
 const CACHE_STATIC = CACHE_PREFIX + 'static-v' + APP_VERSION;
 const CACHE_DYNAMIC = CACHE_PREFIX + 'dynamic-v' + APP_VERSION;
@@ -135,55 +135,65 @@ self.addEventListener('fetch', event => {
 
   const isHtmlRequest = targetReq.url.includes('index.html') || (req.headers.get('accept') && req.headers.get('accept').includes('text/html'));
   
+
   // STRATEGI 2: THE APEX HYBRID SWR (Stale-While-Revalidate untuk File Utama)
   // Tidak ada lagi Timeout 3 Detik yang membunuh koneksi desa.
   if (isHtmlRequest) {
+    const fetchPromise = fetch(targetReq).then(async networkRes => {
+      if (networkRes && networkRes.ok) {
+        const cache = await caches.open(CACHE_STATIC);
+        await cache.put(targetReq, networkRes.clone());
+      }
+      return networkRes;
+    }).catch(() => null); // Jika offline, fetch gagal dengan tenang tanpa crash
+
+    // Thread Lockdown Mutlak: Wajib dipanggil secara sinkron SEBELUM event loop listener berakhir
+    event.waitUntil(fetchPromise);
+
     event.respondWith((async () => {
       const cachedRes = await caches.match(targetReq, { ignoreSearch: true });
-      
-      const fetchPromise = fetch(targetReq).then(async networkRes => {
-        if (networkRes && networkRes.ok) {
-          const cache = await caches.open(CACHE_STATIC);
-          await cache.put(targetReq, networkRes.clone());
-        }
-        return networkRes;
-      }).catch(() => null); // Jika offline, fetch gagal dengan tenang tanpa crash
-
-      // Thread Lockdown: Paksa SW tetap hidup sampai Fetch Background selesai, meskipun Cache instan ditampilkan
-      event.waitUntil(fetchPromise);
-
       // Berikan Cache secara instan. Jika tidak ada (Kunjungan Pertama / Dihapus manual), tunggu Fetch selesai.
       return cachedRes || fetchPromise.then(res => res || Response.error());
     })());
     return;
   }
 
+
   // STRATEGI 3: GOOGLE FONTS & EKSTERNAL ASSETS (Opaque Protection & Cache-First)
   if (reqUrl.hostname === 'fonts.googleapis.com' || reqUrl.hostname === 'fonts.gstatic.com') {
-    event.respondWith((async () => {
+    let backgroundTask;
+    const respondPromise = (async () => {
       const cachedRes = await caches.match(req);
       if (cachedRes) return cachedRes; // Balas instan dari memori
 
       try {
-        const networkRes = await fetch(req);
-        // PROTEKSI KUOTA MUTLAK: Haram hukumnya menyimpan Opaque Response (status 0). Cegah 7MB Quota Bomb!
+        // [SURGICAL FIX] AUTO-CORS UPGRADE: Memaksa no-cors menjadi cors mutlak untuk memecah Opaque Response menjadi 200 OK.
+        const corsReq = new Request(req.url, { mode: 'cors' });
+        const networkRes = await fetch(corsReq);
+        
+        // PROTEKSI KUOTA MUTLAK: Karena sudah di-upgrade, response dijamin 200 OK dan lolos dari status Opaque.
         if (networkRes && networkRes.ok && networkRes.type !== 'opaque') {
           const clone = networkRes.clone();
-          event.waitUntil((async () => {
+          backgroundTask = (async () => {
             const cache = await caches.open(CACHE_STATIC);
-            await cache.put(req, clone);
-          })());
+            await cache.put(req, clone); // Tetap gunakan req asli sebagai gembok kunci memori
+          })();
         }
         return networkRes;
       } catch (err) {
         return Response.error();
       }
-    })());
+    })();
+    
+    // THREAD LOCKDOWN MUTLAK: event.waitUntil dipanggil secara sinkron untuk mem-bypass DOMException InvalidStateError
+    event.waitUntil((async () => { await respondPromise; if (backgroundTask) await backgroundTask; })());
+    event.respondWith(respondPromise);
     return;
   }
 
   // STRATEGI 4: STATIC & DYNAMIC ASSETS LAINNYA (Cache-First, Fallback Network)
-  event.respondWith((async () => {
+  let bgDynamicTask;
+  const mainRespondPromise = (async () => {
     // Abaikan parameter Search/Query string agar file seperti logo.png?v=1.5 tetap kena hit
     const cachedRes = await caches.match(req, { ignoreSearch: true });
     if (cachedRes) return cachedRes; // Anti-DDoS Sendiri: Respon langsung jika ada memori
@@ -194,8 +204,7 @@ self.addEventListener('fetch', event => {
       if (networkRes && networkRes.ok && networkRes.type !== 'opaque') {
         const clone = networkRes.clone();
         
-        // THREAD LOCKDOWN (Mencegah Kematian Garbage Collector di tengah jalan)
-        event.waitUntil((async () => {
+        bgDynamicTask = (async () => {
           const isCoreAsset = staticAssets.some(a => reqUrl.href.includes(a.replace('./', '')));
           const cacheName = isCoreAsset ? CACHE_STATIC : CACHE_DYNAMIC;
           
@@ -205,11 +214,15 @@ self.addEventListener('fetch', event => {
           if (cacheName === CACHE_DYNAMIC) {
              await limitCacheSize(CACHE_DYNAMIC, 60); // Pembersihan sampah memori dengan aman
           }
-        })());
+        })();
       }
       return networkRes;
     } catch (err) {
       return Response.error(); // Jika benar-benar offline dan memori kosong
     }
-  })());
+  })();
+  
+  // THREAD LOCKDOWN MUTLAK: Mencegah Kematian Garbage Collector di tengah jalan (Synchronous Hooking)
+  event.waitUntil((async () => { await mainRespondPromise; if (bgDynamicTask) await bgDynamicTask; })());
+  event.respondWith(mainRespondPromise);
 });
