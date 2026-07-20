@@ -112,7 +112,8 @@
         .form-group label { display: block; font-size: 12px; color: var(--text-main); font-weight: 700; margin-bottom: 8px; }
 
         /* HEADER - PREMIUM EXECUTIVE DESIGN */
-        .header { display: flex; justify-content: space-between; align-items: center; padding: 12px 20px; background: linear-gradient(135deg, #1E3A8A 0%, #0F172A 100%); color: var(--text-light); position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 20px rgba(0,0,0,0.25); border-bottom: 1px solid rgba(255,255,255,0.05); transition: background 0.4s ease; }
+        .header { display: block; padding: 0; background: linear-gradient(135deg, #1E3A8A 0%, #0F172A 100%); color: var(--text-light); position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 20px rgba(0,0,0,0.25); border-bottom: 1px solid rgba(255,255,255,0.05); transition: background 0.4s ease; }
+        .header-top { display: flex; justify-content: space-between; align-items: center; padding: 12px 20px; }
         .logo-wrapper { position: relative; display: inline-block; cursor: pointer; flex-shrink: 0; }
         .app-logo-img { width: 50px; height: 50px; object-fit: contain; background: transparent; display: block; filter: drop-shadow(0 2px 6px rgba(0,0,0,0.4)); margin-right: 2px; }
         .logo-fallback { width: 50px; height: 50px; border-radius: 50%; background: var(--surface); display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 24px; color: var(--primary); box-shadow: 0 2px 8px rgba(0,0,0,0.3); border: 2px solid rgba(255,255,255,0.4); margin-right: 2px; }
@@ -240,12 +241,11 @@
         /* CLASS DEVELOPER DIBUKA UNTUK SEMUA ROLE AGAR MEDIA SOSIAL TERLIHAT */
 
        /* MISC & UTILITIES */ 
-       .ticker-wrap { width: 100%; background: #0F172A; color: #38BDF8; font-size: 11px; font-weight: 700; overflow: hidden; white-space: nowrap; padding: 8px 0; border-bottom: 1px solid #1E293B; }
-        .ticker-text { display: inline-block; padding-left: 100%; animation: ticker 45s linear infinite; letter-spacing: 0.5px; white-space: nowrap; }
+       .ticker-wrap { width: 100%; background: rgba(2, 6, 23, 0.4); font-size: 11px; overflow: hidden; white-space: nowrap; padding: 8px 0; border-top: 1px solid rgba(255,255,255,0.05); cursor: pointer; touch-action: pan-y; -webkit-user-select: none; }
+        .ticker-text { display: inline-block; padding-left: 100%; animation: ticker 20s linear infinite; letter-spacing: 0.5px; white-space: nowrap; will-change: transform; }
+        .ticker-wrap:hover .ticker-text, .ticker-wrap:active .ticker-text { animation-play-state: paused; }
         @keyframes ticker { 0% { transform: translate3d(0, 0, 0); } 100% { transform: translate3d(-100%, 0, 0); } }
-
-
-        
+    
         #screensaver { position: fixed; inset: 0; background: #000; z-index: 999998; display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 1.5s ease-in-out; }
         #screensaver.active { opacity: 1; pointer-events: all; }
         .ss-logo { width: 140px; height: 140px; border-radius: 0; border: none; background: transparent; animation: breathe 4s infinite alternate; margin-bottom: 24px; object-fit: contain;}
@@ -316,8 +316,8 @@
             document.head.appendChild(curtain);
         }
 
-        const CLOUD_API_URL = "https://script.google.com/macros/s/AKfycbyC7RKBrlU1h5ylpMxdDME4IkXs5-eh7SHu_mA7iWYRJeUd0BowOIMRVQXfdJZhTiQw/exec";
-        const CLOUD_API_TOKEN = "Navasena29082026"; // SURGICAL FIX: Dikembalikan ke 2024 agar sinkron dengan Google Script
+        const CLOUD_API_URL = "https://script.google.com/macros/s/AKfycbyqAjU6KMkeP0GiVB3hM6QJ0i29SCap4axHBKTvC4w3HOR6lTzBYWMFTizofvc2U7g/exec";
+        const CLOUD_API_TOKEN = "Navasena29082026";
 
         // --- KONFIGURASI INDEXEDDB LOKAL ---
         const DB_NAME = 'NavasenaFintechDB';
@@ -583,9 +583,12 @@
         }
 
         function saveStore(store, data) {
-            return new Promise((resolve, reject) => {
+            return new Promise(async (resolve, reject) => {
                 try {
                     if(store !== 'settings' && store !== 'aspirasi') localStorage.setItem('nav_unsynced', 'true');
+                    // SURGICAL FIX: JIT DB Connection Healer (Menyembuhkan DB mati seketika)
+                    try { idb.transaction(store, 'readonly'); } catch(err) { await initDB(); }
+                    
                     const tx = idb.transaction(store, 'readwrite');
                     tx.objectStore(store).put(data);
                     tx.oncomplete = resolve;
@@ -595,9 +598,12 @@
         }
 
         function deleteStore(store, id) {
-            return new Promise((resolve, reject) => {
+            return new Promise(async (resolve, reject) => {
                 try {
                     if(store !== 'settings' && store !== 'aspirasi') localStorage.setItem('nav_unsynced', 'true');
+                    // SURGICAL FIX: JIT DB Connection Healer (Menyembuhkan DB mati seketika)
+                    try { idb.transaction(store, 'readonly'); } catch(err) { await initDB(); }
+
                     const tx = idb.transaction(store, 'readwrite');
                     tx.objectStore(store).delete(id);
                     tx.oncomplete = resolve;
@@ -645,7 +651,17 @@
                     // Atribut overscroll-behavior di CSS sudah cukup untuk mengamankan UI.
                 }, {passive: false});
 
+                // SURGICAL FIX: THE PHOENIX PROTOCOL (OS SUSPENSION RESURRECTION)
+                // Memastikan koneksi IDB dibangkitkan ulang jika OS membunuh proses saat aplikasi disembunyikan
+                document.addEventListener('visibilitychange', () => {
+                    if (document.visibilityState === 'visible' && idb) {
+                        try { idb.transaction('settings', 'readonly'); } 
+                        catch (e) { initDB().catch(console.error); }
+                    }
+                });
+
                 // ANGKAT TIRAI CINEMATIC DENGAN MULUS (FAIL-SAFE GLOBAL DIPINDAH KE ATAS SEBELUM DB LOAD)
+
                 if (sessionStorage.getItem('_nx_logout_fx') === 'true') {
                     setTimeout(() => {
                         let fx = document.getElementById('fx-curtain');
@@ -748,43 +764,45 @@
     
     <!-- HEADER - EXECUTIVE ACCESS -->
         <header class="header no-select" id="main-header">
-            <div style="display: flex; align-items: center; gap: 12px;">
-                <div class="logo-wrapper">
-                    <img src="logo.png" alt="Logo" class="app-logo-img" id="hdr-logo-img" onerror="this.style.display='none'; document.getElementById('hdr-logo-fb').style.display='flex';">
-                    <div class="logo-fallback" id="hdr-logo-fb" style="display:none;">N</div>
+            <div class="header-top">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <div class="logo-wrapper">
+                        <img src="logo.png" alt="Logo" class="app-logo-img" id="hdr-logo-img" onerror="this.style.display='none'; document.getElementById('hdr-logo-fb').style.display='flex';">
+                        <div class="logo-fallback" id="hdr-logo-fb" style="display:none;">N</div>
+                    </div>
+                    <div>
+                        <div class="header-title font-nasa" style="font-size: 20px; letter-spacing: 1px;">NAVASENA<sup style="font-size: 10px; margin-left: -3px; letter-spacing: 0;">®</sup></div>
+                        <div class="header-sub" id="hdr-date">Memuat Sistem...</div>
+                    </div>
                 </div>
-                <div>
-                    <div class="header-title font-nasa" style="font-size: 20px; letter-spacing: 1px;">NAVASENA<sup style="font-size: 10px; margin-left: -3px; letter-spacing: 0;">®</sup></div>
-                    <div class="header-sub" id="hdr-date">Memuat Sistem...</div>
+            
+                <!-- GRUP SINKRONISASI CLOUD HEADER (DENGAN PROTEKSI RBAC WARGA) -->
+                <div style="margin-left: auto; display: flex; gap: 4px;">
+                    <button id="btn-hdr-upload" class="no-select" style="background: transparent; color: white; border: none; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; padding: 4px; min-width: 48px;" onclick="syncToCloud()" title="Upload Cloud" onmousedown="this.style.transform='scale(0.92)'" onmouseup="this.style.transform='scale(1)'" ontouchstart="this.style.transform='scale(0.92)'" ontouchend="this.style.transform='scale(1)'">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 2px;">
+                            <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/>
+                            <path d="M12 12v9"/>
+                            <path d="m16 16-4-4-4 4"/>
+                        </svg>
+                        <span style="font-size: 8px; font-weight: 800; letter-spacing: 0.5px;">UPLOAD</span>
+                    </button>
+                    <button id="btn-hdr-load" class="no-select" style="background: transparent; color: white; border: none; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; padding: 4px; min-width: 48px; display: none;" onclick="loadFromCloud()" title="Load Cloud" onmousedown="this.style.transform='scale(0.92)'" onmouseup="this.style.transform='scale(1)'" ontouchstart="this.style.transform='scale(0.92)'" ontouchend="this.style.transform='scale(1)'">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 2px;">
+                            <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/>
+                            <path d="M12 12v9"/>
+                            <path d="m8 17 4 4 4-4"/>
+                        </svg>
+                        <span style="font-size: 8px; font-weight: 800; letter-spacing: 0.5px;">LOAD</span>
+                    </button>
                 </div>
             </div>
-        
-        <!-- GRUP SINKRONISASI CLOUD HEADER (DENGAN PROTEKSI RBAC WARGA) -->
-        <div style="margin-left: auto; display: flex; gap: 4px;">
-            <button id="btn-hdr-upload" class="no-select" style="background: transparent; color: white; border: none; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; padding: 4px; min-width: 48px;" onclick="syncToCloud()" title="Upload Cloud" onmousedown="this.style.transform='scale(0.92)'" onmouseup="this.style.transform='scale(1)'" ontouchstart="this.style.transform='scale(0.92)'" ontouchend="this.style.transform='scale(1)'">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 2px;">
-                    <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/>
-                    <path d="M12 12v9"/>
-                    <path d="m16 16-4-4-4 4"/>
-                </svg>
-                <span style="font-size: 8px; font-weight: 800; letter-spacing: 0.5px;">UPLOAD</span>
-            </button>
-            <button id="btn-hdr-load" class="no-select" style="background: transparent; color: white; border: none; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; padding: 4px; min-width: 48px; display: none;" onclick="loadFromCloud()" title="Load Cloud" onmousedown="this.style.transform='scale(0.92)'" onmouseup="this.style.transform='scale(1)'" ontouchstart="this.style.transform='scale(0.92)'" ontouchend="this.style.transform='scale(1)'">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 2px;">
-                    <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/>
-                    <path d="M12 12v9"/>
-                    <path d="m8 17 4 4 4-4"/>
-                </svg>
-                <span style="font-size: 8px; font-weight: 800; letter-spacing: 0.5px;">LOAD</span>
-            </button>
-        </div>
+            <!-- OMNI TICKER (BERJALAN DI BAWAH HEADER & STICKY) -->
+            <div class="ticker-wrap no-select">
+                <div class="ticker-text" id="bloomberg-ticker">MEMUAT DATA MUTASI REAL-TIME...</div>
+            </div>
     </header>
 
     <main>
-        <!-- GUEST TICKER (BLOOMBERG TERMINAL STYLE) -->
-        <div class="ticker-wrap guest-only no-select">
-            <div class="ticker-text" id="bloomberg-ticker">MEMUAT DATA MUTASI REAL-TIME...</div>
-        </div>
 
         <!-- ===================================== -->
         <!-- MENU 1: BERANDA / DASHBOARD           -->
@@ -1162,28 +1180,51 @@
             let dList = document.getElementById('dash-dompet-list');
             if (dList) dList.innerHTML = dompetHtml;
 
-            // [INJEKSI KOGNITIF]: Engine Ticker Apresiasi Donatur (Real-Time Hydration)
+            // [INJEKSI KOGNITIF]: THE OMNI-TICKER PROTOCOL (God Mode Override + MVP Fusion)
             let tickerEl = document.getElementById('bloomberg-ticker');
             if (tickerEl) {
-                // Filter murni hanya untuk Pemasukan dengan kategori 'Donasi' (Dilindungi String Caster)
-                let donasiTrxTicker = state.trx.filter(t => !t.is_deleted && t.tipe === 'masuk' && (t.kat === 'Donasi' || (t.kat && String(t.kat).toLowerCase().includes('donasi')))).sort((a,b) => b.ts - a.ts).slice(0, 15);
+                let customMsg = getSetting('ticker_msg', '');
                 
-                if (donasiTrxTicker.length > 0) {
-                    let tickerHtml = donasiTrxTicker.map(t => {
-                        let namaDonatur = t.id_anggota ? (state.anggota.find(a => a.id === t.id_anggota)?.nama || 'Anonim') : (t.ket || 'Hamba Allah');
-                        // Ekstraksi pembersih nama (Regex bedah identitas & Anti-Crash)
-                        namaDonatur = String(namaDonatur).replace(/^Donasi\s*(Umum)?\s*[:-]?\s*/i, '').split('-')[0].trim();
-
-                        if (!namaDonatur) namaDonatur = "Hamba Allah";
-                        
-                        let amt = t.nom_final;
-                        let dateStr = new Date(t.ts).toLocaleDateString('id-ID', {day: '2-digit', month: 'short'});
-                        // SURGICAL FIX: Mencabut display:inline-flex yang merusak webview render engine
-                        return `<span style="margin-right: 32px;"><span style="color: #64748B; font-weight: 800; margin-right: 6px;">[${dateStr}]</span><span style="color: #E2E8F0; margin-right: 6px;">Donasi Dari: <span style="color: #FDE68A;">${esc(namaDonatur).toUpperCase()}</span></span><span style="color: #34D399; font-weight: 900;">+RP ${fmtRp(amt)}</span></span>`;
-                    }).join('<span style="color: #38BDF8; font-weight: 900; margin-right: 32px; opacity: 0.7;">•</span>');
-                    tickerEl.innerHTML = tickerHtml;
+                if (customMsg && customMsg.trim() !== '') {
+                    // [OVERRIDE MODE ACTIVATE] Matikan mesin MVP & Donasi untuk hemat RAM HP
+                    // Lakukan repetisi string agar pengumuman memenuhi layar melintas
+                    let singleMsg = `<span style="margin-right: 60px;"><span style="color: #EF4444; font-weight: 900; margin-right: 8px; letter-spacing: 1px;">[🚨 INFO NAVASENA]</span><span style="color: #FFFFFF; font-weight: 800;">${esc(customMsg)}</span></span>`;
+                    tickerEl.innerHTML = singleMsg.repeat(4); // Mengulang pesan 4x
                 } else {
-                    tickerEl.innerHTML = 'BELUM ADA DATA DONASI TEREKAM DI SISTEM...';
+                    // [AUTO-PILOT MODE] Nyalakan mesin pencari Donasi dan MVP
+                    // 1. Ekstraksi Data Donasi (Top 10)
+                    let donasiTrxTicker = state.trx.filter(t => !t.is_deleted && t.tipe === 'masuk' && (t.kat === 'Donasi' || (t.kat && String(t.kat).toLowerCase().includes('donasi')))).sort((a,b) => b.ts - a.ts).slice(0, 10);
+                    let donasiArr = donasiTrxTicker.map(t => {
+                        let namaDonatur = t.id_anggota ? (state.anggota.find(a => a.id === t.id_anggota)?.nama || 'Anonim') : (t.ket || 'Hamba Allah');
+                        namaDonatur = String(namaDonatur).replace(/^Donasi\s*(Umum)?\s*[:-]?\s*/i, '').split('-')[0].trim() || "Hamba Allah";
+                        return `<span style="margin-right: 36px;"><span style="color: #94A3B8; font-weight: 900; margin-right: 8px;">[DONASI BARU]</span><span style="color: #FDE68A; font-weight: 800; margin-right: 8px;">${esc(namaDonatur).toUpperCase()}</span><span style="color: #34D399; font-weight: 900;">+RP ${fmtRp(t.nom_final)}</span></span>`;
+                    });
+
+                    // 2. Ekstraksi Data MVP Teladan (Top 5 - Zero CPU Spiking)
+                    let currY = new Date().getFullYear();
+                    let iMap = {};
+                    state.trx.forEach(t => { if (t.tipe === 'iuran' && !t.is_deleted && t.year === currY) iMap[`${t.id_anggota}-${t.bln}`] = true; });
+                    state.anggota.forEach(ag => { if (ag.arsip_iuran_map) ag.arsip_iuran_map.forEach(ym => { if (ym.startsWith(currY+'-')) iMap[`${ag.id}-${ym.split('-')[1]}`] = true; }); });
+                    
+                    let mvpList = [];
+                    state.anggota.forEach(a => {
+                        let score = 0; for(let i=1; i<=12; i++) { if(iMap[`${a.id}-${i}`]) score++; }
+                        if(score > 0) mvpList.push({nama: a.nama, score: score});
+                    });
+                    mvpList.sort((a,b) => b.score - a.score);
+                    let topMvp = mvpList.slice(0, 5);
+                    
+                    let mvpArr = topMvp.map(m => `<span style="margin-right: 36px;"><span style="color: #D97706; font-weight: 900; margin-right: 8px; letter-spacing: 0.5px;">[🏆 ANGGOTA TELADAN]</span><span style="color: #FFFFFF; font-weight: 900; margin-right: 8px;">${esc(m.nama).toUpperCase()}</span><span style="color: #38BDF8; font-weight: 800;">(LUNAS ${m.score} BLN)</span></span>`);
+
+                    // 3. The Interleave Fusion (Rakit Silang)
+                    let fusionHtml = '';
+                    let maxLen = Math.max(donasiArr.length, mvpArr.length);
+                    for(let i = 0; i < maxLen; i++) {
+                        if (donasiArr[i]) fusionHtml += donasiArr[i];
+                        if (mvpArr[i]) fusionHtml += mvpArr[i];
+                    }
+
+                    tickerEl.innerHTML = fusionHtml || '<span style="color: #94A3B8; font-weight: 800;">[BELUM ADA INFORMASI, DONASI ATAU MVP ANGGOTA NAVASENA]</span>';
                 }
             }
 
@@ -1204,18 +1245,28 @@
             let currentMemberLabel = String(labelEl ? labelEl.value : '').replace(/\s+/g, ' ').trim();
             let opts = [{label: '-- Hapus Jabatan --', value: ''}];
 
-            
+            let currentFoundInMaster = false;
+       
             masterArr.forEach(j => {
                 let jClean = j.toLowerCase();
+                if (currentMemberLabel && jClean === currentMemberLabel.toLowerCase()) {
+                    currentFoundInMaster = true;
+                }
                 // Single-Slot Logic: Hanya tampilkan jika slot belum terisi, ATAU milik anggota yang sedang diedit ini
                 if (!usedLabels.includes(jClean) || jClean === currentMemberLabel.toLowerCase()) {
                     opts.push({label: j, value: j});
                 }
             });
 
+            // SURGICAL FIX: ORPHANED DATA BINDING SHIELD
+            // Mempertahankan jabatan manual warisan agar tidak lenyap dari pilihan dropdown
+            if (currentMemberLabel && !currentFoundInMaster) {
+                opts.push({label: `[Saat Ini] ${currentMemberLabel}`, value: currentMemberLabel});
+            }
+
             // Tombol Manual Override (Tidak akan muncul di Executive Desk publik)
             opts.push({label: '+ Buat Label Manual (Bypass)', value: 'MANUAL_OVERRIDE'});
-            
+       
             openSelectModal('Hierarki Jabatan Resmi', opts, document.getElementById('ang-label-val').value, (val) => {
                 if (val === 'MANUAL_OVERRIDE') {
                     // Eksekusi Custom Prompt Premium (Anti-Freeze & Anti-Blocking DOM)
@@ -1322,8 +1373,10 @@
                         arrHon.push({ nama: 'SLOT TERBUKA', total: 0, is_ghost: true });
                     }
 
-                    // Global Function Injection & State Reset
-                    window.honoraryStack = [0, 1, 2]; // Reset state memory setiap kali render (Anti-Desync Bug)
+                    // Global Function Injection & State Preserver
+                    if (!window.honoraryStack || window.honoraryStack.length !== 3) {
+                        window.honoraryStack = [0, 1, 2]; // Hanya reset jika memori kosong agar animasi 3D Card tidak tersentak saat Auto-Sync
+                    }
                     window.bringCardToFront = function(id) {
                         let idx = window.honoraryStack.indexOf(id);
                         if (idx <= 0) return; // Abaikan jika sudah di depan
@@ -1378,10 +1431,12 @@
                         let rankLabel = i === 0 ? "BLACK CARD" : (i === 1 ? "SAPPHIRE" : "GOLD");
                         
                         hHtml += `
-                        <div id="hc-card-${i}" class="no-select" style="position: absolute; top: 0; left: 0; width: 100%; height: 180px; border-radius: 20px; background: ${bg}; border: 1px solid rgba(255,255,255,0.1); overflow: hidden; box-sizing: border-box; transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); transform-origin: top center; cursor: pointer; opacity: ${isGhost ? '0.7' : '1'};" onclick="window.bringCardToFront(${i})">
-                            
-                            <!-- Giant Anchor NAVASENA Logo (Watermark Kanan Atas) -->
-                            <img src="icon-512.png" style="position: absolute; right: -20px; top: -20px; width: 140px; height: 140px; opacity: 0.15; object-fit: contain; filter: grayscale(100%) brightness(200%); pointer-events: none;" alt="Logo">
+
+                            <div id="hc-card-${i}" class="no-select" style="position: absolute; top: 0; left: 0; width: 100%; height: 180px; border-radius: 20px; background: ${bg}; border: 1px solid rgba(255,255,255,0.1); overflow: hidden; box-sizing: border-box; transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); transform-origin: top center; cursor: pointer; opacity: ${isGhost ? '0.7' : '1'};" onclick="window.bringCardToFront(${i})">
+                                
+                                <!-- Giant Anchor NAVASENA Logo (Watermark Kanan Atas) -->
+                                <img src="icon-512.png" style="position: absolute; right: -40px; top: -40px; width: 240px; height: 240px; opacity: 0.12; object-fit: contain; filter: grayscale(100%) brightness(200%); transform: scale(1.1); pointer-events: none;" alt="Logo">
+
                             
                             <!-- Teks Wrap Protection: Bebas Font NASA & Dibatasi Max-Width -->
                             <div style="position: absolute; top: 55px; left: 20px; right: 20px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 60%; pointer-events: none;">
@@ -1775,14 +1830,6 @@
                         <span style="color: #FCD34D; font-weight: 800;">*INFO:</span> Makin lama telat bayar, poin pemulihan makin kecil (hingga +1 XP). Hadiah nalangi acara dibatasi maksimal 5x dalam setahun.
                     </div>
                 </div>
-            </div>
-
-            <!-- HALL OF FAME WIDGET (PUBLIC MODE) -->
-            <div class="guest-only" style="margin-bottom: 20px; display: none;" id="hall-of-fame-container">
-                <div style="font-size: 11px; font-weight: 800; color: #D97706; text-transform: uppercase; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> APRESIASI KONTRIBUTOR TELADAN
-                </div>
-                <div class="hof-wrap" id="hof-list"></div>
             </div>
 
             <!-- ANCHOR OMNI-BUTTON DAN DAFTAR IURAN -->
@@ -2193,11 +2240,20 @@
                     if (isTerikat) {
                         return showToast("TOLAK: Mutasi ini adalah sistem Ganda (Double-Entry) Kepanitiaan. Dilarang dihapus manual agar kas tidak selisih/bocor!");
                     }
+                    
+                    // SURGICAL FIX: IMMUTABLE ARCHIVE SHIELD (Proteksi Sejarah LPJ)
+                    if (tCek.id_event) {
+                        let evCek = state.event.find(e => e.id === tCek.id_event);
+                        if (evCek && evCek.status === 'arsip') {
+                            return showToast("TOLAK: Mutasi terikat pada Program Acara yang sudah di-LPJ-kan/Diarsipkan. Sejarah tidak boleh dirusak!");
+                        }
+                    }
                 }
 
                 if(typeof openConfirm === 'function') {
                     openConfirm("Hapus Transaksi?", "Anda yakin menghapus data ini? Dana akan dikalkulasi ulang (Rollback) ke kas utama dan program.", "danger", 
                         async () => {
+
                             let idx = state.trx.findIndex(t => t.id === id);
                             if(idx > -1) {
                                 let tTarget = state.trx[idx];
@@ -2302,8 +2358,16 @@
             }
 
             function toggleIuranAccordion(id) {
+                if(typeof pulseHaptic === 'function') pulseHaptic('light');
                 const body = document.getElementById('i-body-' + id);
-                body.style.display = body.style.display === 'block' ? 'none' : 'block';
+                const chevron = document.getElementById('chevron-' + id);
+                if (body.style.display === 'block') {
+                    body.style.display = 'none';
+                    if (chevron) chevron.style.transform = 'rotate(0deg)';
+                } else {
+                    body.style.display = 'block';
+                    if (chevron) chevron.style.transform = 'rotate(180deg)';
+                }
             }
 
             function toggleBayarIuran(idAg, bln, thn, idTrx) {
@@ -2425,12 +2489,16 @@
                         let unPaidGlobal = [];
                         let jBlnG = ag.join_bln || 1;
                         let jYearG = ag.join_year || 2000;
-                        for(let i=1; i<=12; i++) {
-                            let isBeforeJoin = (yGlobal < jYearG) || (yGlobal === jYearG && i < jBlnG);
-                            let isPaid = iuranMapGlobalSync[`${ag.id}-${yGlobal}-${i}`];
-                            if(!isBeforeJoin && !isPaid) {
-                                if (yGlobal < currYearRealGlobal || (yGlobal === currYearRealGlobal && i <= currMonthRealGlobal)) {
-                                    unPaidGlobal.push(['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'][i-1]); 
+                        
+                        for (let yg = jYearG; yg <= currYearRealGlobal; yg++) {
+                            for(let i=1; i<=12; i++) {
+                                let isBeforeJoin = (yg < jYearG) || (yg === jYearG && i < jBlnG);
+                                let isPaid = iuranMapGlobalSync[`${ag.id}-${yg}-${i}`];
+                                if(!isBeforeJoin && !isPaid) {
+                                    if (yg < currYearRealGlobal || (yg === currYearRealGlobal && i <= currMonthRealGlobal)) {
+                                        let namaBulan = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'][i-1];
+                                        unPaidGlobal.push(yg !== currYearRealGlobal ? `${namaBulan} '${String(yg).slice(-2)}` : namaBulan); 
+                                    }
                                 }
                             }
                         }
@@ -2523,7 +2591,7 @@
                             });
                         }
 
-                        let mvpTag = (mvpId === ag.id) ? `<span style="font-size: 8.5px; font-weight: 900; letter-spacing: 0.5px; background: linear-gradient(135deg, #FDE68A 0%, #F59E0B 100%); color: white; padding: 4px 8px; border-radius: 8px; margin-left: 6px; box-shadow: 0 4px 10px rgba(245, 158, 11, 0.3);">👑 MVP BULAN INI</span>` : '';
+                        let mvpTag = (mvpId === ag.id) ? `<span style="font-size: 8.5px; font-weight: 900; letter-spacing: 0.5px; background: linear-gradient(135deg, #FDE68A 0%, #F59E0B 100%); color: white; padding: 4px 8px; border-radius: 8px; margin-left: 6px; box-shadow: 0 4px 10px rgba(245, 158, 11, 0.3);">MVP</span>` : '';
                         let badgeLabel = ag.label ? `<span style="font-size: 8.5px; font-weight: 900; letter-spacing: 1px; background: linear-gradient(135deg, #0F172A 0%, #1E3A8A 100%); color: #38BDF8; border: 1px solid rgba(56, 189, 248, 0.4); padding: 4px 10px; border-radius: 12px; box-shadow: 0 4px 10px rgba(15, 23, 42, 0.2); display: inline-flex; align-items: center;">${esc(ag.label).toUpperCase()}</span>` : '';
                         let isBdayToday = ag.tgl_lahir && ag.tgl_lahir.endsWith(dMMDD);
 
@@ -2576,25 +2644,33 @@
                             }
 
                             let badgeComboSvg = window.getSvgBadge ? window.getSvgBadge(hitunganCombo) : '';
-                            let rText = ag.is_deficit ? `<span style="color:var(--danger)">AFK ${ag.xp_total} XP</span>` : `⚔️ ${ag.rank_name} (${ag.xp_total} XP) ${badgeComboSvg}`;
+                            let rText = ag.is_deficit ? `<span style="color:var(--danger); font-size:11px; font-weight:900;">AFK (${ag.xp_total} XP)</span>` : `<span style="color:var(--text-main); font-size:11px; font-weight:800;">⚔️ ${ag.rank_name} <span style="color:var(--primary); font-weight:900;">(${ag.xp_total} XP)</span></span> ${badgeComboSvg}`;
                             let bCol = ag.is_deficit ? 'border-color: var(--danger);' : (ag.xp_total > 4000 ? 'border-color: #F59E0B;' : 'border-color: transparent;');
                             let bdayGlowStyle = isBdayToday ? 'animation: bdayPulse 1.5s infinite alternate; border-color: #FBBF24 !important;' : '';
 
                             html += `
-                            <div class="iuran-user" style="border: 2px solid transparent; position: relative; overflow: hidden; ${bCol} ${bdayGlowStyle} transition:0.3s;">
+                            <div class="iuran-user" style="border: 2px solid transparent; position: relative; overflow: hidden; ${bCol} ${bdayGlowStyle} transition:0.3s; margin-bottom: 12px;">
                                 ${confettiString}
-                                <div class="iuran-user-head no-select" style="padding: 16px; position: relative; z-index: 2;" onclick="toggleIuranAccordion('${ag.id}')">
-                                    <div style="display:flex; align-items:center; gap:14px; flex: 1;">
-                                        <div class="rank-shield ${ag.rank_class}" style="width: 44px; height: 44px; flex-shrink: 0; cursor: pointer; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15));" onclick="event.stopPropagation(); if(typeof previewKTA === 'function') previewKTA('${ag.id}')"></div>
-                                        <div style="flex: 1; min-width: 0;">
-                                            <div style="font-size: 15px; font-weight: 900; color: var(--text-main); display:flex; align-items:center; flex-wrap:wrap; gap:6px; margin-bottom:6px;">${esc(ag.nama)} ${bdayIcon} ${mvpTag}</div>
-                                            <div style="display:flex; flex-wrap:wrap; gap:4px; margin-bottom: 6px;">${badgeLabel} ${legacyHtml}</div>
-                                            <div style="font-size: 11px; font-weight: 800; color: var(--text-muted);">${rText}</div>
+                                <div class="iuran-user-head no-select" style="padding: 16px; position: relative; z-index: 2; display: flex; justify-content: space-between; align-items: center;" onclick="toggleIuranAccordion('${ag.id}')">
+                                    <div style="display:flex; align-items:center; gap:14px; flex: 1; min-width: 0;">
+                                        <div class="rank-shield ${ag.rank_class}" style="width: 44px; height: 44px; flex-shrink: 0; cursor: pointer; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15));" onclick="event.stopPropagation(); if(typeof previewKTA === 'function') previewKTA('${ag.id}')" title="Lihat KTA"></div>
+                                        <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center;">
+                                            <div style="display: flex; align-items: center; margin-bottom: 4px; width: 100%; overflow: hidden;">
+                                                <div style="font-size: 15px; font-weight: 900; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 0 1 auto; letter-spacing: -0.3px;">${esc(ag.nama)}</div>
+                                                <div style="display: flex; align-items: center; flex-shrink: 0;">${bdayIcon} ${mvpTag}</div>
+                                            </div>
+                                            <div style="display:flex; flex-wrap:wrap; gap:4px;">${badgeLabel}</div>
                                         </div>
                                     </div>
-                                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                                    <div style="background: rgba(0,0,0,0.03); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-left: 12px;">
+                                        <svg id="chevron-${ag.id}" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2.5" style="transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);"><polyline points="6 9 12 15 18 9"/></svg>
+                                    </div>
                                 </div>
-                                <div class="iuran-user-body" id="i-body-${ag.id}" style="position: relative; z-index: 2;">
+                                <div class="iuran-user-body" id="i-body-${ag.id}" style="position: relative; z-index: 2; padding: 0 16px 16px 16px; display: none; border-top: 1px dashed var(--border); margin-top: 4px; padding-top: 16px;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 8px;">
+                                        <div>${rText}</div>
+                                        <div style="display: flex; gap: 4px;">${legacyHtml}</div>
+                                    </div>
                                     <div class="iuran-grid">${gridHtml}</div>
                                 </div>
                             </div>`;
@@ -2638,106 +2714,48 @@
                             }
 
                             let badgeComboSvg = window.getSvgBadge ? window.getSvgBadge(hitunganCombo) : '';
-                            let rText = ag.is_deficit ? `<span style="color:var(--danger)">AFK ${ag.xp_total} XP</span>` : `⚔️ <span style="color:var(--text-muted);">${ag.rank_name}</span> <span style="color:var(--primary); font-weight:900;">(${ag.xp_total} XP)</span> ${badgeComboSvg}`;
-                            let bCol = isMe ? 'border: 2px solid var(--primary); background: #F8FAFC; box-shadow: 0 10px 25px -5px rgba(30, 58, 138, 0.15); transform: scale(1.01); order: -1;' : (ag.is_deficit ? 'border: 1.5px solid var(--danger); box-shadow: 0 0 15px rgba(239,68,68,0.1); background: var(--surface); opacity: 0.95;' : 'border: 1.5px solid var(--border); background: var(--surface);');
+                            let rText = ag.is_deficit ? `<span style="color:var(--danger); font-size:11px; font-weight:900;">AFK (${ag.xp_total} XP)</span>` : `<span style="color:var(--text-main); font-size:11px; font-weight:800;">⚔️ ${ag.rank_name} <span style="color:var(--primary); font-weight:900;">(${ag.xp_total} XP)</span></span> ${badgeComboSvg}`;
+                            let bCol = isMe ? 'border: 2px solid var(--primary); background: #F8FAFC; box-shadow: 0 10px 25px -5px rgba(30, 58, 138, 0.15); order: -1;' : (ag.is_deficit ? 'border: 1.5px solid var(--danger); box-shadow: 0 0 15px rgba(239,68,68,0.1); background: var(--surface); opacity: 0.95;' : 'border: 1.5px solid var(--border); background: var(--surface);');
                             let bdayGlowStylePublic = isBdayToday ? 'animation: bdayPulse 1.5s infinite alternate; border-color: #FBBF24 !important;' : '';
                             
                             html += `
-                            <div class="no-select widget-anggota" style="${bCol} position: relative; overflow: hidden; ${bdayGlowStylePublic} border-radius: 20px; margin-bottom: 16px; padding: 20px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; gap: 16px;">
+                            <div class="no-select widget-anggota iuran-user" style="${bCol} position: relative; overflow: hidden; ${bdayGlowStylePublic} border-radius: 20px; margin-bottom: 12px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); padding: 0;">
                                 ${confettiString}
-                                <div style="display: flex; gap: 16px; align-items: flex-start; position: relative; z-index: 2;">
-                                    <div class="rank-shield ${ag.rank_class}" style="width: 50px; height: 50px; cursor: pointer; flex-shrink: 0; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15)); transition: 0.2s;" onmousedown="this.style.transform='scale(0.9)'" onmouseup="this.style.transform='scale(1)'" onclick="event.stopPropagation(); if(typeof previewKTA === 'function') previewKTA('${ag.id}')" title="Lihat KTA"></div>
-                                    <div style="flex: 1; min-width: 0;">
-                                        <div style="font-size: 16px; font-weight: 900; color: var(--text-main); margin-bottom: 4px; display:flex; align-items:center; flex-wrap:wrap; gap:6px; letter-spacing: -0.3px;">${esc(ag.nama)} ${bdayIcon} ${mvpTag}</div>
-                                        <div style="display:flex; flex-wrap:wrap; gap:4px; margin-bottom: 8px;">
-                                            ${badgeLabel}
-                                            ${legacyHtml}
+                                <div class="iuran-user-head" style="display: flex; justify-content: space-between; align-items: center; padding: 16px; position: relative; z-index: 2; cursor: pointer; transition: background 0.2s;" onclick="toggleIuranAccordion('${ag.id}')">
+                                    <div style="display: flex; align-items: center; gap: 14px; flex: 1; min-width: 0;">
+                                        <div class="rank-shield ${ag.rank_class}" style="width: 44px; height: 44px; cursor: pointer; flex-shrink: 0; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15)); transition: 0.2s;" onclick="event.stopPropagation(); if(typeof previewKTA === 'function') previewKTA('${ag.id}')" title="Lihat KTA"></div>
+                                        <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center;">
+                                            <div style="display: flex; align-items: center; margin-bottom: 4px; width: 100%; overflow: hidden;">
+                                                <div style="font-size: 15px; font-weight: 900; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 0 1 auto; letter-spacing: -0.3px;">${esc(ag.nama)}</div>
+                                                <div style="display: flex; align-items: center; flex-shrink: 0;">${bdayIcon} ${mvpTag}</div>
+                                            </div>
+                                            <div style="display:flex; flex-wrap:wrap; gap:4px;">${badgeLabel}</div>
                                         </div>
-                                        <div style="font-size: 11.5px; font-weight: 800;">${rText}</div>
+                                    </div>
+                                    <div style="background: rgba(0,0,0,0.03); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-left: 12px;">
+                                        <svg id="chevron-${ag.id}" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2.5" style="transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);"><polyline points="6 9 12 15 18 9"/></svg>
                                     </div>
                                 </div>
                                 
-                                <div style="background: #F1F5F9; border: 1px solid #E2E8F0; border-radius: 12px; padding: 14px 12px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); position: relative; z-index: 2;">
-                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                                        <div style="font-size: 9.5px; font-weight: 900; color: #64748B; text-transform: uppercase; letter-spacing: 1px;">Catatan Iuran ${y}</div>
-                                        <div style="font-size: 9px; font-weight: 800; color: #94A3B8; letter-spacing: 0.5px;">JANUARI -> DESEMBER</div>
+                                <div class="iuran-user-body" id="i-body-${ag.id}" style="display: none; padding: 0 16px 16px 16px; position: relative; z-index: 2; border-top: 1px dashed var(--border); margin-top: 4px; padding-top: 16px;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 8px;">
+                                        <div>${rText}</div>
+                                        <div style="display: flex; gap: 4px;">${legacyHtml}</div>
                                     </div>
-                                    <div style="display: flex; gap: 3px; width: 100%; align-items: center; height: 16px;">
-                                        ${gridBoxes}
+                                    <div style="background: #F1F5F9; border: 1px solid #E2E8F0; border-radius: 12px; padding: 14px 12px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">
+                                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                                            <div style="font-size: 9.5px; font-weight: 900; color: #64748B; text-transform: uppercase; letter-spacing: 1px;">Catatan Iuran ${y}</div>
+                                            <div style="font-size: 9px; font-weight: 800; color: #94A3B8; letter-spacing: 0.5px;">JANUARI -> DESEMBER</div>
+                                        </div>
+                                        <div style="display: flex; gap: 3px; width: 100%; align-items: center; height: 16px;">
+                                            ${gridBoxes}
+                                        </div>
                                     </div>
                                 </div>
                             </div>`;
                         }
                     });
-                }
-                
-                // --- KLASEMEN HALL OF FAME (KIOSK MODE ONLY) ---
-                if(isKiosk && document.getElementById('hof-list') && !searchVal) {
-                    let hofScores = [];
-                    filteredAnggota.forEach(a => {
-                        let pCount = 0;
-                        for(let i=1; i<=12; i++) { if(iuranMap[`${a.id}-${i}`]) pCount++; }
-                        hofScores.push({nama: a.nama, score: pCount});
-                    });
-                    hofScores.sort((a,b) => b.score - a.score);
-                    let topHof = hofScores.slice(0, 4).filter(h => h.score > 0);
-                    
-                    if(topHof.length > 0) {
-                        // SURGICAL FIX: Sembunyikan judul hardcoded agar tidak double title dengan Tombol Bento
-                        let container = document.getElementById('hall-of-fame-container');
-                        if (container && container.firstElementChild) container.firstElementChild.style.display = 'none';
 
-                        let hofHtml = `
-                        <div class="no-select" style="background: linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%); border: 1.5px solid #FDE68A; border-radius: 16px; padding: 16px; margin-bottom: 12px; box-shadow: 0 4px 10px rgba(217, 119, 6, 0.05); cursor: pointer; position: relative; overflow: hidden; transition: 0.2s;" onclick="let b = document.getElementById('hof-cards-wrap'); let i = document.getElementById('hof-chevron'); if(b.style.display==='none'){b.style.display='flex'; i.style.transform='rotate(180deg)';}else{b.style.display='none'; i.style.transform='rotate(0deg)';}">
-                            <div style="position: absolute; right: -15px; top: -15px; opacity: 0.15; transform: rotate(15deg); pointer-events: none;">
-                                <svg width="80" height="80" viewBox="0 0 24 24" fill="#FDE68A" stroke="#D97706" stroke-width="2"><circle cx="12" cy="8" r="7"></circle><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline></svg>
-                            </div>
-                            <div style="display: flex; align-items: center; justify-content: space-between; position: relative; z-index: 2;">
-                                <div style="display: flex; align-items: center; gap: 12px;">
-                                    <div style="width: 38px; height: 38px; background: #FEF3C7; border-radius: 10px; display: flex; align-items: center; justify-content: center; border: 1.5px solid #FCD34D; box-shadow: 0 2px 4px rgba(217,119,6,0.1);">
-                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="#FDE68A" stroke="#D97706" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="7"></circle><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline></svg>
-                                    </div>
-                                    <div>
-                                        <div style="font-size: 10px; font-weight: 900; color: #B45309; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 2px;">Apresiasi Teladan</div>
-                                        <div style="font-size: 13px; font-weight: 900; color: #92400E;">Lihat ${topHof.length} Anggota MVP</div>
-                                    </div>
-                                </div>
-                                <div style="color: #92400E; background: rgba(255,255,255,0.5); border-radius: 50%; padding: 4px; display: flex; align-items: center; justify-content: center;">
-                                    <svg id="hof-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);"><polyline points="6 9 12 15 18 9"></polyline></svg>
-                                </div>
-                            </div>
-                        </div>
-                        <div id="hof-cards-wrap" style="display: none; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; padding-bottom: 8px;">`;
-                        
-                        let rStyle = [
-                            { bg: 'linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%)', border: '#FDE68A', tM: '#92400E', tS: '#B45309', fill: '#FDE68A', stroke: '#D97706', lbl: '1ST MVP' },
-                            { bg: 'linear-gradient(135deg, #F8FAFC 0%, #F1F5F9 100%)', border: '#E2E8F0', tM: '#334155', tS: '#64748B', fill: '#E2E8F0', stroke: '#64748B', lbl: '2ND MVP' },
-                            { bg: 'linear-gradient(135deg, #FFF7ED 0%, #FFEDD5 100%)', border: '#FED7AA', tM: '#9A3412', tS: '#C2410C', fill: '#FED7AA', stroke: '#C2410C', lbl: '3RD MVP' },
-                            { bg: 'linear-gradient(135deg, #F0FDF4 0%, #DCFCE7 100%)', border: '#A7F3D0', tM: '#065F46', tS: '#059669', fill: '#A7F3D0', stroke: '#059669', lbl: 'ELITE' }
-                        ];
-                        topHof.forEach((h, i) => {
-                            let s = rStyle[i] || rStyle[3];
-                            hofHtml += `
-                            <div class="no-select" style="flex: 0 0 130px; scroll-snap-align: start; background: ${s.bg}; border: 1.5px solid ${s.border}; border-radius: 16px; padding: 16px 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.04); display: flex; flex-direction: column; align-items: center; text-align: center; position: relative; overflow: hidden;">
-                                <div style="position: absolute; top: -15px; right: -15px; opacity: 0.15; transform: rotate(15deg); pointer-events: none;">
-                                    <svg width="70" height="70" viewBox="0 0 24 24" fill="${s.fill}" stroke="${s.stroke}" stroke-width="2"><circle cx="12" cy="8" r="7"></circle><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline></svg>
-                                </div>
-                                <div style="margin-bottom: 10px; position: relative; z-index: 2;">
-                                    <svg width="34" height="34" viewBox="0 0 24 24" fill="${s.fill}" stroke="${s.stroke}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="filter: drop-shadow(0 4px 6px rgba(0,0,0,0.15));"><circle cx="12" cy="8" r="7"></circle><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline></svg>
-                                </div>
-                                <div style="font-size: 10px; font-weight: 900; color: ${s.tS}; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; position: relative; z-index: 2;">${s.lbl}</div>
-                                <div style="font-size: 14px; font-weight: 900; color: ${s.tM}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; margin-bottom: 12px; position: relative; z-index: 2;">${esc(h.nama)}</div>
-                                <div style="background: rgba(255,255,255,0.7); border-radius: 8px; padding: 6px; font-size: 10px; font-weight: 900; color: ${s.tM}; border: 1px solid ${s.border}; width: 100%; position: relative; z-index: 2; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">LUNAS ${h.score} BLN</div>
-                            </div>`;
-                        });
-                        hofHtml += '</div>';
-                        document.getElementById('hof-list').innerHTML = hofHtml;
-                        document.getElementById('hall-of-fame-container').style.display = 'block';
-                    } else {
-                        document.getElementById('hall-of-fame-container').style.display = 'none';
-                    }
-                } else if (document.getElementById('hall-of-fame-container')) {
-                    document.getElementById('hall-of-fame-container').style.display = 'none';
                 }
 
                 // Pengamanan Container Omni-Button
@@ -2748,10 +2766,12 @@
 
                 document.getElementById('iuran-list').innerHTML = html;
 
-                // Restorasi status accordion
-                    activeAccordions.forEach(id => {
+                // Restorasi status accordion beserta arah putaran Chevron
+                activeAccordions.forEach(id => {
                     let el = document.getElementById(id);
                     if (el) el.style.display = 'block';
+                    let chev = document.getElementById(id.replace('i-body-', 'chevron-'));
+                    if (chev) chev.style.transform = 'rotate(180deg)';
                 });
                 
                 // Eksekusi Omni-Button Evaluator
@@ -2926,7 +2946,7 @@
                     <!-- SURGICAL FIX: Cincin Holografik & mix-blend-mode untuk memusnahkan background hitam -->
                     <div style="width: 140px; height: 140px; background: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%); border-radius: 50%; padding: 3px; box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);">
                         <div style="background: #0F172A; width: 100%; height: 100%; border-radius: 50%; display: flex; align-items: center; justify-content: center; overflow: visible; border: 1px solid rgba(255,255,255,0.2);">
-                            <img src="icon-512.png" alt="Logo Navasena" class="prof-logo-img" id="prof-logo-img" onerror="this.style.display='none'; document.getElementById('prof-logo-fb').style.display='flex';" style="width: 115%; height: 115%; object-fit: contain; margin: 0; mix-blend-mode: screen; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5)); transform: none;">
+                            <img src="icon-512.png" alt="Logo Navasena" class="prof-logo-img" id="prof-logo-img" onerror="this.style.display='none'; document.getElementById('prof-logo-fb').style.display='flex';" style="width: 115%; height: 115%; object-fit: contain; margin: 0; mix-blend-mode: screen; filter: drop-shadow(0 4px 12px rgba(0,0,0,0.8)); transform: scale(1.35);">
                             <div class="prof-logo-fallback" id="prof-logo-fb" style="display:none; width: 100%; height: 100%; border: none; margin: 0; align-items: center; justify-content: center;">N</div>
                         </div>
                     </div>
@@ -2935,7 +2955,7 @@
                 <div class="guest-only" style="margin-bottom: 20px; position: relative; z-index: 2; display: flex; justify-content: center;">
                     <div style="width: 140px; height: 140px; background: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%); border-radius: 50%; padding: 3px; box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);">
                         <div style="background: #0F172A; width: 100%; height: 100%; border-radius: 50%; display: flex; align-items: center; justify-content: center; overflow: visible; border: 1px solid rgba(255,255,255,0.2);">
-                            <img src="icon-512.png" alt="Logo Navasena" class="prof-logo-img guest-logo-img" onerror="this.style.display='none'; document.getElementById('guest-logo-fb').style.display='flex';" style="width: 115%; height: 115%; object-fit: contain; margin: 0; mix-blend-mode: screen; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5)); transform: none;">
+                            <img src="icon-512.png" alt="Logo Navasena" class="prof-logo-img guest-logo-img" onerror="this.style.display='none'; document.getElementById('guest-logo-fb').style.display='flex';" style="width: 115%; height: 115%; object-fit: contain; margin: 0; mix-blend-mode: screen; filter: drop-shadow(0 4px 12px rgba(0,0,0,0.8)); transform: scale(1.35);">
                             <div class="prof-logo-fallback guest-logo-fb" id="guest-logo-fb" style="display:none; width: 100%; height: 100%; border: none; margin: 0; align-items: center; justify-content: center;">N</div>
                         </div>
                     </div>
@@ -3367,6 +3387,7 @@
 
                 <!-- SCROLLABLE CONTENT AREA -->
                 <div style="padding: 20px 24px; overflow-y: auto; flex: 1; min-height: 0; position: relative;">                    
+
                     <!-- TAB 1: KAS & DOMPET -->
                     <div id="set-tab-1" style="display: block;">
                         <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 16px; margin-bottom: 24px; box-shadow: var(--shadow-sm);">
@@ -3374,6 +3395,14 @@
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M22 10v4"/><circle cx="18" cy="12" r="1"/></svg> Arsitektur Dompet
                             </div>
                             
+                            <div class="form-group" style="margin-bottom: 20px;">
+                                <label style="font-size: 11px; font-weight: 800; color: var(--text-main); display: flex; justify-content: space-between; align-items: center;">
+                                    <span>Papan Pengumuman Global</span>
+                                    <span style="font-size: 9px; color: #EF4444; background: #FEE2E2; padding: 2px 6px; border-radius: 4px;">TICKER OVERRIDE</span>
+                                </label>
+                                <textarea id="set-ticker-msg" rows="3" placeholder="Ketik pengumuman penting di sini...&#10;(Kosongkan kotak ini untuk mengembalikan ticker ke mode otomatis Donasi & MVP)" style="line-height: 1.5; font-size: 13px; font-weight: 600; background: #F8FAFC; border: 1.5px solid #E2E8F0; border-radius: 12px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.03); resize: none;"></textarea>
+                            </div>
+
                             <div class="ios-item no-select" style="background: #F8FAFC; border: 1.5px solid #E2E8F0; border-radius: 12px; padding: 12px 16px; margin-bottom: 20px;" onclick="closeModal('mod-settings'); openModal('mod-dompet')">
                                 <div class="ios-icon" style="background: #FFFBEB; color: #D97706; border: 1px solid #FDE68A; margin-right: 12px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
                                 <div style="flex: 1;">
@@ -3531,10 +3560,11 @@
                 <div style="position: absolute; top: -60px; left: 50%; transform: translateX(-50%); width: 120px; height: 120px; background: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%); border-radius: 50%; padding: 3px; box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6); z-index: 1;">
                     <div style="background: #0F172A; width: 100%; height: 100%; border-radius: 50%; display: flex; align-items: center; justify-content: center; overflow: visible; border: 1px solid rgba(255,255,255,0.2);">
                         <!-- SURGICAL FIX: width 115% & overflow visible agar logo meluap menutupi lingkaran biru -->
-                        <img src="icon-512.png" alt="Logo" style="width: 115%; height: 115%; object-fit: contain; mix-blend-mode: screen; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5));" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        <img src="icon-512.png" alt="Logo" style="width: 115%; height: 115%; object-fit: contain; mix-blend-mode: screen; filter: drop-shadow(0 4px 12px rgba(0,0,0,0.8)); transform: scale(1.35);" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                         <div style="display:none; font-weight: 900; font-size: 58px; color: #38BDF8;">N</div>
                     </div>
                 </div>
+
 
                 <div style="margin-top: 8px; width: 100%; position: relative; z-index: 2;">
                     <div id="ident-title" style="font-size: 18px; font-weight: 900; color: #FFFFFF; letter-spacing: 2px; margin-bottom: 2px; text-shadow: 0 4px 10px rgba(0,0,0,0.5); text-transform: uppercase;">PORTAL</div>
@@ -3796,6 +3826,7 @@
                     renderListAnggota();
 
                 } else if (id === 'mod-settings') {
+                    document.getElementById('set-ticker-msg').value = getSetting('ticker_msg', '');
                     document.getElementById('set-iuran-nom').value = fmtRp(getSetting('iuran_nom', 10000));
                     document.getElementById('set-kat-masuk').value = getSetting('kat_masuk', 'Donasi, Sponsor,');
                     document.getElementById('set-kat-keluar').value = getSetting('kat_keluar', 'Operasional, Konsumsi, HUT RI');
@@ -4354,9 +4385,9 @@
                 }
 
                 openConfirm("SELESAI (Arsip Program)", "Program ini akan dihapus dari Beranda dan pilihan transaksi agar aplikasi tetap ringan. Data mutasinya tetap aman dan terekap di Excel.", "info", async () => {
-                    isProcessingTransaction = true; 
                     let idx = state.event.findIndex(e => e.id === id);
                     if (idx > -1) {
+                        isProcessingTransaction = true; 
                         try {
                             let ev_update = {...state.event[idx], status: 'arsip'};
                             await saveStore('event', ev_update);
@@ -4440,6 +4471,7 @@
                 if(isKiosk) return showToast("DITOLAK: Sistem Terkunci dalam Mode Audit.");
                 let newIuran = getRawRp(document.getElementById('set-iuran-nom').value);
 
+                setSetting('ticker_msg', document.getElementById('set-ticker-msg').value);
                 setSetting('iuran_nom', newIuran);
                 setSetting('kat_masuk', document.getElementById('set-kat-masuk').value);
                 setSetting('kat_keluar', document.getElementById('set-kat-keluar').value);
@@ -4684,6 +4716,7 @@
                     mod.style.transition = "all 0.4s cubic-bezier(0.16, 1, 0.3, 1)";
                     mod.style.opacity = "0";
                     mod.style.transform = "scale(0.9)";
+
                     setTimeout(() => {
                         mod.style.display = "none";
                         mod.style.opacity = "1";
@@ -4697,9 +4730,12 @@
                         // SURGICAL FIX: Kembalikan Teks ke "PORTAL" agar modal siap di siklus login berikutnya
                         if (modTitle) modTitle.innerText = "PORTAL";
                         
+                        document.body.classList.remove('modal-open'); // THE SCROLL-LOCK EXORCISM: Pelepasan kunci layar mutlak untuk Warga
+                        
                         if (fetchSuccess) showToast("Sugeng Rawuh Warga RT 05.");
                         else showToast("⚠️ Anda sedang Offline. Menggunakan data tersimpan.");
                     }, 400);
+
                 } else {
                     btnWarga.disabled = false; btnAnggota.disabled = false;
                     
@@ -5222,6 +5258,9 @@
                     yearlyXP.sort((a,b) => b.xp - a.xp);
                     let top3 = yearlyXP.slice(0, 3).map(x => x.id);
                     
+                    // JIT DB CONNECTION HEALER: Membangkitkan memori IndexedDB yang ditidurkan OS
+                    try { idb.transaction(['trx', 'anggota', 'event'], 'readonly'); } catch(err) { await initDB(); }
+
                     await new Promise((resolve, reject) => {
                         const tx = idb.transaction(['trx', 'anggota', 'event'], 'readwrite');
                         const storeTrx = tx.objectStore('trx');
@@ -6188,6 +6227,9 @@
                 openConfirm("Lunasi Semua Nota?", `Melunasi ${targetNotas.length} nota talangan sebesar Rp ${fmtRp(totalNom)}. Uang akan ditarik dari dompet asalnya masing-masing.`, "info", async () => {
                     isProcessingTransaction = true;
                     try {
+                        // JIT DB CONNECTION HEALER: Membangkitkan memori IndexedDB yang ditidurkan OS
+                        try { idb.transaction('trx', 'readonly'); } catch(err) { await initDB(); }
+
                         await new Promise((resolve, reject) => {
                             const tx = idb.transaction('trx', 'readwrite');
                             const store = tx.objectStore('trx');
@@ -6251,7 +6293,8 @@
                 }
             }
 
-            async function executeSmartLpj() {
+             async function executeSmartLpj() {
+                if(isKiosk) return showToast("DITOLAK: Sistem Terkunci dalam Mode Audit.");
                 if(isProcessingTransaction) return;
                 let idDompet = document.getElementById('slpj-dompet-id').value;
                 
@@ -6318,6 +6361,9 @@
                     
                     // SURGICAL FIX: Isolasi Dompet Mutlak untuk memburu dan menyelesaikan nota uang muka awal PJ bersangkutan (Anti-Double Expense Cross-Wallet)
                     let parentPendingTrxs = state.trx.filter(t => !t.is_deleted && t.id_event === idEvent && t.id_dompet === idDompet && t.status === 'pending');
+
+                    // JIT DB CONNECTION HEALER: Membangkitkan memori IndexedDB yang ditidurkan OS
+                    try { idb.transaction(['trx', 'dompet'], 'readonly'); } catch(err) { await initDB(); }
 
                     // EKSEKUSI ATOMIK MUTLAK (Anti-Corruption)
                     await new Promise((resolve, reject) => {
@@ -6472,6 +6518,7 @@
 
             // --- DONASI RAPID & PJ ADVANCE (GOD-MODE OVERRIDE) ---
             window.executeDonasiRapid = async function(btnElement) {
+                if(isKiosk) return showToast("DITOLAK: Akses ilegal terdeteksi. Otoritas Bendahara Mutlak diperlukan.");
                 if(window.isProcessingTransaction) return;
                 let activeModal = (btnElement && btnElement.closest) ? btnElement.closest('.modal') : Array.from(document.querySelectorAll('.modal')).find(m => m.style.display === 'flex' || m.style.display === 'block');
                 if(!activeModal) return alert("Sistem Error: Modal tidak terdeteksi di layar.");
@@ -6517,6 +6564,7 @@
             };
 
             window.executePjAdvance = async function(btnElement) {
+                if(isKiosk) return showToast("DITOLAK: Akses ilegal terdeteksi. Otoritas Bendahara Mutlak diperlukan.");
                 if(window.isProcessingTransaction) return;
                 let activeModal = (btnElement && btnElement.closest) ? btnElement.closest('.modal') : Array.from(document.querySelectorAll('.modal')).find(m => m.style.display === 'flex' || m.style.display === 'block');
                 if(!activeModal) return alert("Sistem Error: Modal tidak terdeteksi di layar.");
@@ -6561,6 +6609,9 @@
                     let trxOut = { id: genID('KB'), ts: tsNow, tipe: 'keluar', nom_awal: nom, nom_final: nom, ket: `Transfer ke PJ: ${ket}`, kat: 'Uang Muka Kegiatan', status: 'lunas', id_event: evId, id_anggota: idAg, id_dompet: targetDompet, is_deleted: false, year: yr };
                     let trxIn = { id: genID('TX'), ts: tsNow + 1, tipe: 'masuk', nom_awal: nom, nom_final: nom, ket: `Terima dari Kas Induk: ${ket}`, kat: 'Transfer Internal', status: 'lunas', id_event: evId, id_anggota: idAg, id_dompet: newDpId, is_deleted: false, year: yr };
                     
+                    // JIT DB CONNECTION HEALER: Membangkitkan memori IndexedDB yang ditidurkan OS
+                    try { idb.transaction('trx', 'readonly'); } catch(err) { await initDB(); }
+
                     // EKSEKUSI ATOMIK MUTLAK (Anti-Corruption)
                     await new Promise((resolve, reject) => {
                         let stores = ['trx'];
@@ -6668,6 +6719,9 @@
                 if (!isSilent) showToast("Menyinkronkan data ke Cloud...");
 
                 try {
+                    // SURGICAL FIX: Pre-Flight DB Health Check (Mencegah Deadlock saat Sinkronisasi)
+                    try { idb.transaction('settings', 'readonly'); } catch(err) { await initDB(); }
+
                     // [DIRECTIVE AI OVERRIDE] PROTEKSI IDENTITAS MASTER
                     // AI dilarang mengubah parameter otorisasi Master. isKiosk adalah satu-satunya penentu Hak Akses Master.
                     let isAuthMaster = !isKiosk; // SURGICAL FIX: Hanya Admin (isKiosk = false) yang boleh menimpa data tabel Kas ke Server. Guest/Warga otomatis false.
@@ -6677,6 +6731,7 @@
                         try {
                             const tx = idb.transaction('aspirasi', 'readonly');
                             const req = tx.objectStore('aspirasi').getAll();
+
                             req.onsuccess = () => resolve(req.result || []);
                             req.onerror = () => resolve([]);
                         } catch(e) { resolve([]); }
@@ -6694,6 +6749,7 @@
                         payload.event = state.event;
                         payload.dompet = state.dompet;
                         payload.settings = {
+                            ticker_msg: getSetting('ticker_msg', ''),
                             iuran_nom: getSetting('iuran_nom', 10000),
                             kat_masuk: getSetting('kat_masuk', 'Donasi, Sponsor,'),
                             kat_keluar: getSetting('kat_keluar', 'Operasional, Konsumsi, HUT RI'),
@@ -6749,9 +6805,13 @@
                 if (window._isLoadingData) return;
                 if (!navigator.onLine) { if (!isSilent) showToast("❌ Gagal Load: Koneksi internet terputus."); return; }
                 
+                // SURGICAL FIX: Pre-Flight DB Health Check (Mencegah Deadlock saat Sinkronisasi)
+                try { idb.transaction('settings', 'readonly'); } catch(err) { await initDB(); }
+
                 // SURGICAL FIX: Deadlock Breaker. Berikan jalan keluar untuk Override jika dipanggil manual.
                 if (localStorage.getItem('nav_unsynced') === 'true') {
                     if (isSilent) return; // Tolak diam-diam untuk Auto-Sync demi melindungi data lokal
+
 
                     pulseHaptic('warn');
                     openConfirm(
