@@ -2960,20 +2960,20 @@
             
             <!-- PROFIL WARGA (DEFAULT) -->
             <div id="profil-warga-default" class="no-select" style="position: relative; overflow: hidden; background: linear-gradient(135deg, #0F172A 0%, #172554 50%, #1E3A8A 100%); border: 1px solid rgba(255,255,255,0.15); border-radius: 24px; padding: 24px 20px; text-align: center; margin-bottom: 24px; box-shadow: 0 20px 40px -10px rgba(15, 23, 42, 0.7), inset 0 1px 0 rgba(255,255,255,0.2);">
-                <div style="position: absolute; top: -50px; left: -50px; width: 150px; height: 150px; background: rgba(56, 189, 248, 0.15); filter: blur(30px); border-radius: 50%;"></div>
-                <div style="position: absolute; bottom: -50px; right: -50px; width: 150px; height: 150px; background: rgba(16, 185, 129, 0.15); filter: blur(30px); border-radius: 50%;"></div>
+                <div style="position: absolute; top: -60px; left: -60px; width: 180px; height: 180px; background: rgba(56, 189, 248, 0.15); filter: blur(40px); border-radius: 50%;"></div>
+                <div style="position: absolute; bottom: -60px; right: -60px; width: 180px; height: 180px; background: rgba(16, 185, 129, 0.15); filter: blur(40px); border-radius: 50%;"></div>
                 
                 <input type="file" id="logo-upload" accept="image/*" class="hidden" onchange="handleLogoUpload(event)">
 
                 <!-- SURGICAL FIX: Standalone Logo Protocol -->
-                <div class="logo-wrapper kiosk-hide" style="margin-bottom: 24px; position: relative; z-index: 2; display: flex; justify-content: center; width: 100%;" onclick="document.getElementById('logo-upload').click()" title="Ketuk untuk mengubah logo">
-                    <img src="icon-512.png" alt="Logo Navasena" class="prof-logo-img" id="prof-logo-img" onerror="this.style.display='none'; document.getElementById('prof-logo-fb').style.display='flex';" style="width: 130px; height: 130px; object-fit: contain; margin: 0; filter: drop-shadow(0 15px 25px rgba(0,0,0,0.6));">
-                    <div class="prof-logo-fallback" id="prof-logo-fb" style="display:none; width: 130px; height: 130px; border: none; margin: 0; align-items: center; justify-content: center; background: transparent; color: #FFFFFF; font-size: 58px; text-shadow: 0 10px 20px rgba(0,0,0,0.5);">N</div>
+                <div class="logo-wrapper kiosk-hide" style="margin-bottom: 4px; position: relative; z-index: 2; display: flex; justify-content: center; width: 100%;" onclick="document.getElementById('logo-upload').click()" title="Ketuk untuk mengubah logo">
+                    <img src="icon-512.png" alt="Logo Navasena" class="prof-logo-img" id="prof-logo-img" onerror="this.style.display='none'; document.getElementById('prof-logo-fb').style.display='flex';" style="width: 170px; height: 170px; object-fit: contain; margin: 0; filter: drop-shadow(0 18px 35px rgba(0,0,0,0.7));">
+                    <div class="prof-logo-fallback" id="prof-logo-fb" style="display:none; width: 170px; height: 170px; border: none; margin: 0; align-items: center; justify-content: center; background: transparent; color: #FFFFFF; font-size: 80px; text-shadow: 0 10px 20px rgba(0,0,0,0.5);">N</div>
                 </div>
 
-                <div class="guest-only" style="margin-bottom: 24px; position: relative; z-index: 2; display: flex; justify-content: center; width: 100%;">
-                    <img src="icon-512.png" alt="Logo Navasena" class="prof-logo-img guest-logo-img" onerror="this.style.display='none'; document.getElementById('guest-logo-fb').style.display='flex';" style="width: 130px; height: 130px; object-fit: contain; margin: 0; filter: drop-shadow(0 15px 25px rgba(0,0,0,0.6));">
-                    <div class="prof-logo-fallback guest-logo-fb" id="guest-logo-fb" style="display:none; width: 130px; height: 130px; border: none; margin: 0; align-items: center; justify-content: center; background: transparent; color: #FFFFFF; font-size: 58px; text-shadow: 0 10px 20px rgba(0,0,0,0.5);">N</div>
+                <div class="guest-only" style="margin-bottom: 4px; position: relative; z-index: 2; display: flex; justify-content: center; width: 100%;">
+                    <img src="icon-512.png" alt="Logo Navasena" class="prof-logo-img guest-logo-img" onerror="this.style.display='none'; document.getElementById('guest-logo-fb').style.display='flex';" style="width: 170px; height: 170px; object-fit: contain; margin: 0; filter: drop-shadow(0 18px 35px rgba(0,0,0,0.7));">
+                    <div class="prof-logo-fallback guest-logo-fb" id="guest-logo-fb" style="display:none; width: 170px; height: 170px; border: none; margin: 0; align-items: center; justify-content: center; background: transparent; color: #FFFFFF; font-size: 80px; text-shadow: 0 10px 20px rgba(0,0,0,0.5);">N</div>
                 </div>
              
                 <div style="margin-top: 0; width: 100%; position: relative; z-index: 2;">
@@ -3570,17 +3570,19 @@
 
         <!-- SECURITY & IDENTITY MODALS (BENTO UI) -->
         <div id="mod-identity" class="modal" style="background: rgba(2, 6, 23, 0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); z-index: 99999;">
+
             <div class="modal-box no-select" style="overflow: visible; margin-top: 25px; background: linear-gradient(180deg, #1E293B 0%, #0F172A 100%); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 28px; text-align: center; max-width: 340px; display: flex; flex-direction: column; align-items: center; padding: 60px 24px 24px 24px; position: relative; box-shadow: 0 40px 80px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.1);">
 
-                <div style="position: absolute; top: -65px; left: 50%; transform: translateX(-50%); width: 140px; height: 140px; background: rgba(59, 130, 246, 0.3); filter: blur(35px); border-radius: 50%; z-index: 0; pointer-events: none;"></div>
+                <div style="position: absolute; top: -75px; left: 50%; transform: translateX(-50%); width: 160px; height: 160px; background: rgba(59, 130, 246, 0.3); filter: blur(35px); border-radius: 50%; z-index: 0; pointer-events: none;"></div>
 
-                <!-- SURGICAL FIX: Standalone Logo Protocol & Anti-Collision Space -->
-                <div style="position: absolute; top: -70px; left: 50%; transform: translateX(-50%); width: 135px; height: 135px; z-index: 1; display: flex; align-items: center; justify-content: center;">
+                <!-- SURGICAL FIX: Standalone Logo Protocol & Anti-Collision Space (Scaled Up) -->
+                <div style="position: absolute; top: -80px; left: 50%; transform: translateX(-50%); width: 155px; height: 155px; z-index: 1; display: flex; align-items: center; justify-content: center;">
                     <img src="icon-512.png" alt="Logo" style="width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 15px 25px rgba(0,0,0,0.6));" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                    <div style="display:none; font-weight: 900; font-size: 58px; color: #FFFFFF; text-shadow: 0 10px 20px rgba(0,0,0,0.5);">N</div>
+                    <div style="display:none; font-weight: 900; font-size: 64px; color: #FFFFFF; text-shadow: 0 10px 20px rgba(0,0,0,0.5);">N</div>
                 </div>
 
-                <div style="margin-top: 75px; width: 100%; position: relative; z-index: 2;">
+                <div style="margin-top: 85px; width: 100%; position: relative; z-index: 2;">
+
                     <div id="ident-title" style="font-size: 18px; font-weight: 900; color: #FFFFFF; letter-spacing: 2px; margin-bottom: 2px; text-shadow: 0 4px 10px rgba(0,0,0,0.5); text-transform: uppercase;">PORTAL</div>
 
                     <h3 class="font-nasa" style="font-size: 28px; color: #FFFFFF; letter-spacing: 1.5px; margin-bottom: 8px; text-shadow: 0 4px 10px rgba(0,0,0,0.5);">NAVASENA<sup style="font-size: 12px; margin-left: -3px; letter-spacing: 0;">®</sup></h3>
@@ -5305,9 +5307,17 @@
                             storeAng.put(agUpdate);
                         });
 
-                        // Sapu Bersih Arsip Program (Meringankan Memori)
-                        let evToDel = state.event.filter(e => e.status === 'arsip');
+                        // Sapu Bersih Arsip Program (Meringankan Memori) - DILINDUNGI DARI ANIHILASI PREMATUR
+                        let evToDel = state.event.filter(e => {
+                            if (e.status !== 'arsip') return false;
+                            // Jangan hapus jika masih ada transaksi aktif di tahun berjalan/masa depan
+                            let hasCurrentYearTrx = state.trx.some(t => t.id_event === e.id && (t.year || new Date(t.ts).getFullYear()) >= currY);
+                            return !hasCurrentYearTrx;
+                        });
                         evToDel.forEach(e => storeEvt.delete(e.id));
+                        
+                        // Sinkronisasi RAM mutlak (Pembersihan state yang tertinggal)
+                        state.event = state.event.filter(e => !evToDel.some(del => del.id === e.id));
                         
                         // SURGICAL FIX: Anihilasi Dompet PJ Yatim Piatu (Mencegah Phantom Wallet Leak)
                         let dompetPjToDel = state.dompet.filter(d => d.is_pj && evToDel.some(e => e.id === d.id_event));
@@ -5315,6 +5325,7 @@
                         state.dompet = state.dompet.filter(d => !dompetPjToDel.some(del => del.id === d.id));
 
                         oldTrxAll.forEach(t => storeTrx.delete(t.id));
+
                         
                         Object.keys(saldoAwalDompet).forEach(d => {
                             if(saldoAwalDompet[d] !== 0) {
@@ -5358,88 +5369,112 @@
                     </button>
                 </div>
                 
-                   <div style="flex: 1 1 auto; overflow-y: auto; min-height: 0; padding: 24px 24px 40px 24px; -webkit-overflow-scrolling: touch;">                    <div id="sop-admin" style="display: block;">
+                   <div style="flex: 1 1 auto; overflow-y: auto; min-height: 0; padding: 24px 24px 40px 24px; -webkit-overflow-scrolling: touch;">                    
+
+                    <div id="sop-admin" style="display: block;">
 
                         <div style="background: #FEF2F2; border-left: 5px solid #DC2626; padding: 16px; margin-bottom: 24px; border-radius: 12px; box-shadow: 0 4px 12px rgba(220, 38, 38, 0.08); display: flex; gap: 12px; align-items: flex-start;">
-                            <div style="background: #DC2626; color: white; width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px;">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M12 12v9"/><path d="m16 16-4-4-4 4"/></svg>
+                            <div style="background: linear-gradient(135deg, #DC2626 0%, #991B1B 100%); color: white; width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 4px 10px rgba(220, 38, 38, 0.3); margin-top: 2px;">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M12 12v9"/><path d="m16 16-4-4-4 4"/></svg>
                             </div>
                             <div>
-                                <b style="color: #991B1B; font-size: 14px; text-transform: uppercase;">HUKUM MUTLAK "OFFLINE-FIRST"</b>
-                                <p style="font-size: 12px; color: #7F1D1D; line-height: 1.5; margin-top: 4px; font-weight: 500;">Sistem <span class="font-nasa" style="font-size: 1.1em;">NAVASENA</span> bekerja di dalam memori HP Anda agar super cepat. Seluruh data yang Anda ketik HANYA tersimpan di perangkat ini.
+                                <b style="color: #991B1B; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px;">Hukum Mutlak "Offline-First"</b>
+                                <p style="font-size: 12px; color: #7F1D1D; line-height: 1.5; margin-top: 4px; font-weight: 500;">Sistem <span class="font-nasa" style="font-size: 1.1em;">NAVASENA</span> bekerja di dalam memori HP Anda untuk performa super cepat. Seluruh data yang Anda ketik HANYA tersimpan di perangkat ini. Anda <b>WAJIB</b> menekan tombol <b>Upload (Awan)</b> <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="display:inline-block; vertical-align:middle; transform:translateY(-1.5px);"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M12 12v9"/><path d="m16 16-4-4-4 4"/></svg> di pojok kanan atas setelah selesai mencatat mutasi agar data tersimpan permanen di Server Pusat.</p>
                             </div>
                         </div>
 
                         <div style="display: flex; flex-direction: column; gap: 12px;">
                             
                             <div style="background: var(--surface); border: 1.5px solid var(--border); border-radius: 14px; box-shadow: var(--shadow-sm); overflow: hidden;">
-                                <div style="padding: 16px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; background: var(--surface-hover); transition: background 0.2s;" onclick="togglePanduan('adm', 4, 1, this)">
+                                <div style="padding: 16px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; background: var(--surface-hover); transition: background 0.2s;" onclick="togglePanduan('adm', 5, 1, this)">
                                     <div style="display: flex; align-items: center; gap: 12px;">
-                                        <div style="color: var(--primary); display: flex; align-items: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></div>
-                                        <b style="font-size: 14px; color: var(--text-main);">MENU BERANDA & MUTASI</b>
+                                        <div style="background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%); color: #1D4ED8; width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; border: 1px solid #BFDBFE; flex-shrink: 0;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></div>
+                                        <b style="font-size: 14px; color: var(--text-main);">MENU 1: BERANDA</b>
                                     </div>
-                                    <div style="color: var(--text-muted); display: flex; align-items: center;"><svg id="ic-adm-1" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);"><polyline points="6 9 12 15 18 9"/></svg></div>
+                                    <div style="color: var(--text-muted); display: flex; align-items: center;"><svg id="ic-adm-1" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);"><polyline points="6 9 12 15 18 9"/></svg></div>
                                 </div>
                                 <div id="tut-adm-1" style="display: none; padding: 16px; border-top: 1.5px solid var(--border); background: var(--surface);">
                                     <div style="font-size: 12.5px; color: var(--text-main); line-height: 1.6;">
-                                        <ul style="padding-left: 16px;">
-                                            <li style="margin-bottom: 8px;"><b>Mencatat Transaksi:</b> Sentuh tombol melayang <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="3" style="background:var(--primary); border-radius:50%; padding:2px; display:inline-block; vertical-align:middle; transform:translateY(-1.5px); margin:0 2px;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> di pojok kanan bawah. <br><i style="color:var(--text-muted);">Contoh Kasus: Untuk mencatat pembelian sapu, buka form, pilih 'Dana Keluar', ketik nominal, pilih kategori 'Belanja Alat', dan pilih dompet yang terpotong.</i></li>
-                                            <li><b>Menghapus/Membatalkan Transaksi:</b> Jika salah ketik nominal, buka Menu Mutasi <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="display:inline-block; vertical-align:middle; transform:translateY(-1.5px); margin:0 2px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>, cari transaksi tersebut, dan sentuh teks merah <b>Hapus Transaksi (Koreksi)</b>. Uang akan otomatis dikembalikan (Rollback) ke Dompet Kas. Anda dapat mengecek data yang terhapus di Menu Sistem ➔ Keranjang Sampah.</li>
+                                        <ul style="padding-left: 16px; margin: 0;">
+                                            <li style="margin-bottom: 8px;"><b>Total Saldo Global:</b> Menampilkan rangkuman kekayaan mutlak organisasi dari seluruh dompet aktif yang dijumlahkan menjadi satu.</li>
+                                            <li style="margin-bottom: 8px;"><b>Distribusi Kas:</b> Deretan kotak dompet (seperti Kas Utama, dll). <b>Geser (Swipe)</b> kotak tersebut ke kiri/kanan untuk mengecek alokasi pemisahan saldo uang tunai atau uang di rekening bank.</li>
+                                            <li><b>Analitik Arus Kas & Laporan WA:</b> Rekapan cepat Pemasukan/Pengeluaran bulan berjalan. Tekan tombol hijau di paling bawah layar untuk membagikan laporan ringkas bulan ini langsung ke Grup WhatsApp.</li>
                                         </ul>
                                     </div>
                                 </div>
                             </div>
 
                             <div style="background: var(--surface); border: 1.5px solid var(--border); border-radius: 14px; box-shadow: var(--shadow-sm); overflow: hidden;">
-                                <div style="padding: 16px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; background: var(--surface-hover); transition: background 0.2s;" onclick="togglePanduan('adm', 4, 2, this)">
+                                <div style="padding: 16px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; background: var(--surface-hover); transition: background 0.2s;" onclick="togglePanduan('adm', 5, 2, this)">
                                     <div style="display: flex; align-items: center; gap: 12px;">
-                                        <div style="color: var(--primary); display: flex; align-items: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg></div>
-                                        <b style="font-size: 14px; color: var(--text-main);">MENU IURAN & ANGGOTA</b>
+                                        <div style="background: linear-gradient(135deg, #F5F3FF 0%, #E9D5FF 100%); color: #7E22CE; width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; border: 1px solid #D8B4FE; flex-shrink: 0;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></div>
+                                        <b style="font-size: 14px; color: var(--text-main);">MENU 2: MUTASI KAS</b>
                                     </div>
-                                    <div style="color: var(--text-muted); display: flex; align-items: center;"><svg id="ic-adm-2" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);"><polyline points="6 9 12 15 18 9"/></svg></div>
+                                    <div style="color: var(--text-muted); display: flex; align-items: center;"><svg id="ic-adm-2" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);"><polyline points="6 9 12 15 18 9"/></svg></div>
                                 </div>
                                 <div id="tut-adm-2" style="display: none; padding: 16px; border-top: 1.5px solid var(--border); background: var(--surface);">
                                     <div style="font-size: 12.5px; color: var(--text-main); line-height: 1.6;">
-                                        <ul style="padding-left: 16px;">
-                                            <li style="margin-bottom: 8px;"><b>Membayar Kas Tahun Depan (Advance Payer):</b> Sentuh teks kotak <b>Tahun Buku</b> di pojok kiri atas layar Iuran, ubah ke tahun depan, lalu sentuh bulan pada nama anggota yang membayar hingga berwarna hijau. Sistem otomatis memberikannya Bonus XP Ekstra.</li>
-                                            <li style="margin-bottom: 8px;"><b>Penagihan Tunggakan Otomatis:</b> Jika ada anggota yang menunggak, tombol Penagihan Massal <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="display:inline-block; vertical-align:middle; transform:translateY(-1.5px); margin:0 2px;"><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg> akan muncul di bawah kotak pencarian. Sentuh tombol ini, sistem akan merangkum utang setiap anggota dan menyusun pesan otomatis yang siap Anda kirimkan via WhatsApp secara berurutan.</li>
-                                            <li><b>Batal Iuran Ditolak (Saldo Minus):</b> <i style="color:var(--text-muted);">Masalah: Anda batal melunaskan iuran seseorang, tapi sistem menolak dengan pesan "Saldo Dompet Minus".</i> Ini terjadi jika uang kas dari iuran tersebut sudah dipakai untuk belanja (uang di dompet habis). Hapus catatan pengeluaran belanja terlebih dahulu agar saldo kembali, barulah iuran bisa dibatalkan.</li>
+                                        <ul style="padding-left: 16px; margin: 0;">
+                                            <li style="margin-bottom: 8px;"><b>Input Transaksi (Tombol +):</b> Sentuh tombol melayang di pojok kanan bawah. Anda bisa mencatat Dana Masuk, Dana Keluar (opsi Lunas, Modal PJ, atau Hutang Talangan), memilih kategori (Konsumsi, Operasional, dll), serta menunjuk dari Dompet mana uang ditarik.</li>
+                                            <li style="margin-bottom: 8px;"><b>Sistem Rollback (Batal Mutasi):</b> Jika salah ketik, cari transaksi terkait lalu sentuh <b>Hapus Transaksi (Koreksi)</b>. Uang akan otomatis dikembalikan (Rollback) ke Dompet asal tanpa merusak pembukuan. Transaksi yang dihapus akan disimpan di Keranjang Sampah.</li>
+                                            <li><b>Anti-Minus System (Defisit Shield):</b> Sistem otomatis memblokir catatan "Dana Keluar" atau menolak "Batal Pemasukan" jika saldo Dompet tujuan tidak mencukupi, menjaga keamanan kas dari kebocoran/minus.</li>
                                         </ul>
                                     </div>
                                 </div>
                             </div>
 
                             <div style="background: var(--surface); border: 1.5px solid var(--border); border-radius: 14px; box-shadow: var(--shadow-sm); overflow: hidden;">
-                                <div style="padding: 16px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; background: var(--surface-hover); transition: background 0.2s;" onclick="togglePanduan('adm', 4, 3, this)">
+                                <div style="padding: 16px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; background: var(--surface-hover); transition: background 0.2s;" onclick="togglePanduan('adm', 5, 3, this)">
                                     <div style="display: flex; align-items: center; gap: 12px;">
-                                        <div style="color: var(--primary); display: flex; align-items: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
-                                        <b style="font-size: 14px; color: var(--text-main);">MENU PROGRAM (ACARA)</b>
+                                        <div style="background: linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 100%); color: #059669; width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; border: 1px solid #A7F3D0; flex-shrink: 0;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg></div>
+                                        <b style="font-size: 14px; color: var(--text-main);">MENU 3: IURAN & ANGGOTA</b>
                                     </div>
-                                    <div style="color: var(--text-muted); display: flex; align-items: center;"><svg id="ic-adm-3" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);"><polyline points="6 9 12 15 18 9"/></svg></div>
+                                    <div style="color: var(--text-muted); display: flex; align-items: center;"><svg id="ic-adm-3" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);"><polyline points="6 9 12 15 18 9"/></svg></div>
                                 </div>
                                 <div id="tut-adm-3" style="display: none; padding: 16px; border-top: 1.5px solid var(--border); background: var(--surface);">
                                     <div style="font-size: 12.5px; color: var(--text-main); line-height: 1.6;">
-                                        <ul style="padding-left: 16px;">
-                                            <li style="margin-bottom: 8px;"><b>Klasemen Donasi:</b> Di layar ini, Anda bisa menyuntikkan dana langsung ke dalam perputaran program dengan tombol <b>+ DONASI PROGRAM</b>. Jika sumbangan berasal dari donatur non-anggota, pilih tab <i>Donatur Umum</i> agar sistem otomatis memberikannya label "PIHAK LUAR" di papan klasemen publik untuk transparansi.</li>
-                                            <li><b>Panitia Acara Nombok:</b> <i style="color:var(--text-muted);">Masalah: Panitia diberi modal awal Rp 500.000, tetapi pembelanjaan habis Rp 600.000.</i> Solusi: Di blok Program, lihat bagian "Dana Di Bawa PJ", sentuh <b>TUTUP LPJ</b>, pilih opsi <b>NOMBOK</b>, lalu masukkan nominal selisih (Rp 100.000). Sistem akan langsung menyedot Rp 100.000 dari Kas Utama untuk mengganti uang panitia dan membuat laporan anggaran acara Balance (Tuntas).</li>
+                                        <ul style="padding-left: 16px; margin: 0;">
+                                            <li style="margin-bottom: 8px;"><b>Matriks Iuran (Advance Payer):</b> Sentuh bulan pada nama anggota untuk melunasi iuran. Ubah kotak 'Tahun Buku' di kiri atas ke tahun depan jika ada anggota yang ingin melunasi lebih awal (Advance). Anggota tersebut akan otomatis mendapat Bonus Poin XP.</li>
+                                            <li style="margin-bottom: 8px;"><b>Penagihan Massal (Omni-Button):</b> Jika terdeteksi ada tunggakan, sebuah tombol besar akan muncul di layar. Sentuh tombol ini, dan sistem akan mengumpulkan utang tiap anggota lalu membuat draf pesan tagihan WA secara otomatis per-orang.</li>
+                                            <li><b>Kelola Data Anggota:</b> Gunakan tombol atas untuk membuka form Database Anggota (Tambah/Edit profil, Jabatan Resmi, Nomor WA, Golongan Darah, hingga pengaturan Ulang Tahun).</li>
                                         </ul>
                                     </div>
                                 </div>
                             </div>
 
                             <div style="background: var(--surface); border: 1.5px solid var(--border); border-radius: 14px; box-shadow: var(--shadow-sm); overflow: hidden;">
-                                <div style="padding: 16px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; background: var(--surface-hover); transition: background 0.2s;" onclick="togglePanduan('adm', 4, 4, this)">
+                                <div style="padding: 16px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; background: var(--surface-hover); transition: background 0.2s;" onclick="togglePanduan('adm', 5, 4, this)">
                                     <div style="display: flex; align-items: center; gap: 12px;">
-                                        <div style="color: var(--primary); display: flex; align-items: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
-                                        <b style="font-size: 14px; color: var(--text-main);">MENU SISTEM & PROFIL</b>
+                                        <div style="background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%); color: #D97706; width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; border: 1px solid #FCD34D; flex-shrink: 0;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+                                        <b style="font-size: 14px; color: var(--text-main);">MENU 4: PROGRAM (ACARA)</b>
                                     </div>
-                                    <div style="color: var(--text-muted); display: flex; align-items: center;"><svg id="ic-adm-4" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);"><polyline points="6 9 12 15 18 9"/></svg></div>
+                                    <div style="color: var(--text-muted); display: flex; align-items: center;"><svg id="ic-adm-4" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);"><polyline points="6 9 12 15 18 9"/></svg></div>
                                 </div>
                                 <div id="tut-adm-4" style="display: none; padding: 16px; border-top: 1.5px solid var(--border); background: var(--surface);">
                                     <div style="font-size: 12.5px; color: var(--text-main); line-height: 1.6;">
-                                        <ul style="padding-left: 16px;">
-                                            <li style="margin-bottom: 8px;"><b>Mengembalikan Data (Ganti Perangkat):</b> Jika Anda berpindah ke HP baru atau HP lama tiba-tiba error (Blank), buka menu ini dan tekan tombol <b>Load Data Cloud</b> <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="display:inline-block; vertical-align:middle; transform:translateY(-1.5px); margin:0 2px;"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M12 12v9"/><path d="m8 17 4 4 4-4"/></svg>. Seluruh arsip data di Server Pusat akan diturunkan kembali ke HP Anda secara penuh.</li>
-                                            <li><b>Tutup Buku Tahunan:</b> Di akhir periode tahunan, pastikan seluruh Program Acara yang aktif telah diarsipkan, lalu gunakan fitur ini. Sistem akan menghapus detail mutasi tahun lama dari memori HP dan mengompresnya menjadi satu baris "Saldo Awal Pindahan" agar aplikasi tetap ringan untuk periode tahun berikutnya. <i style="color:var(--danger); font-weight:700;">Wajib: Lakukan Cetak / Download Excel sebelum menekan Tutup Buku.</i></li>
+                                        <ul style="padding-left: 16px; margin: 0;">
+                                            <li style="margin-bottom: 8px;"><b>Pisah Dompet Kepanitiaan:</b> Saat membuat Program Baru, Anda memiliki opsi untuk membuat "Dompet Kas Khusus" agar uang donasi acara tidak tercampur secara akuntansi dengan Kas Utama organisasi.</li>
+                                            <li style="margin-bottom: 8px;"><b>Donasi Rapid & Cairkan Modal PJ:</b> Gunakan dua tombol di dalam kartu acara untuk memasukkan donasi dengan cepat (pilih donatur Internal atau Umum), atau menyalurkan uang operasional ke Panitia/PJ lapangan.</li>
+                                            <li><b>Smart LPJ (Tutup Acara):</b> Saat memantau "Dana Di Bawa PJ", klik <b>TUTUP LPJ</b> jika belanja sudah usai. Pilih <b style="color:var(--success);">PAS</b> (pengeluaran cocok), <b style="color:var(--primary);">SISA</b> (panitia kembalikan uang ke kas), atau <b style="color:var(--danger);">NOMBOK</b> (sistem otomatis sedot kas untuk mengganti uang panitia yang terpakai berlebih).</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div style="background: var(--surface); border: 1.5px solid var(--border); border-radius: 14px; box-shadow: var(--shadow-sm); overflow: hidden;">
+                                <div style="padding: 16px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; background: var(--surface-hover); transition: background 0.2s;" onclick="togglePanduan('adm', 5, 5, this)">
+                                    <div style="display: flex; align-items: center; gap: 12px;">
+                                        <div style="background: linear-gradient(135deg, #F8FAFC 0%, #E2E8F0 100%); color: #475569; width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; border: 1px solid #CBD5E1; flex-shrink: 0;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+                                        <b style="font-size: 14px; color: var(--text-main);">MENU 5: SISTEM & PROFIL</b>
+                                    </div>
+                                    <div style="color: var(--text-muted); display: flex; align-items: center;"><svg id="ic-adm-5" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);"><polyline points="6 9 12 15 18 9"/></svg></div>
+                                </div>
+                                <div id="tut-adm-5" style="display: none; padding: 16px; border-top: 1.5px solid var(--border); background: var(--surface);">
+                                    <div style="font-size: 12.5px; color: var(--text-main); line-height: 1.6;">
+                                        <ul style="padding-left: 16px; margin: 0;">
+                                            <li style="margin-bottom: 8px;"><b>Konfigurasi Sistem:</b> Area mengubah Tarif Iuran bulanan, Nama Dompet, List Jabatan, Pesan Ticker Pengumuman, dan mengubah PIN Akses Bendahara.</li>
+                                            <li style="margin-bottom: 8px;"><b>Pemulihan & Pelaporan Eksekutif:</b> Gunakan "Load Data Cloud" untuk menarik arsip utuh dari Server (misal saat ganti HP). Anda juga bisa mengekspor laporan LPJ berformat PDF lengkap dengan ulasan analisis AI, atau Unduh Excel untuk rekapan mentah.</li>
+                                            <li><b>Tutup Buku Tahunan (Zona Kritis):</b> Di penghujung periode tahun, fitur ini MENGHAPUS rincian mutasi masa lalu secara massal dan meringkasnya menjadi satu baris "Saldo Awal" agar aplikasi super ringan untuk tahun baru. <i style="color:var(--danger); font-weight:700;">Wajib: Lakukan Cetak/Unduh Excel sebelum menekan fitur berbahaya ini.</i></li>
                                         </ul>
                                     </div>
                                 </div>
@@ -5450,79 +5485,106 @@
                     <!-- PANDUAN ANGGOTA -->
                     <div id="sop-anggota" style="display: none;">
                         <div style="background: #FFFBEB; border-left: 5px solid #F59E0B; padding: 16px; margin-bottom: 24px; border-radius: 12px; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.08); display: flex; gap: 12px; align-items: flex-start;">
-                            <div style="background: #F59E0B; color: white; width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px;">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                            <div style="background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%); color: white; width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 4px 10px rgba(245, 158, 11, 0.3); margin-top: 2px;">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
                             </div>
                             <div>
-                                <b style="color: #92400E; font-size: 14px; text-transform: uppercase;">AKSES EKSKLUSIF ANGGOTA</b>
-                                <p style="font-size: 12px; color: #B45309; line-height: 1.5; margin-top: 4px; font-weight: 500;">Selamat datang! Karena Anda telah memverifikasi identitas menggunakan Nomor WhatsApp terdaftar, Anda memiliki hak istimewa (Executive Access) untuk melacak rekam jejak pribadi, kontribusi donasi, serta status kedisiplinan organisasi Anda.</p>
+                                <b style="color: #92400E; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px;">AKSES EKSKLUSIF ANGGOTA</b>
+                                <p style="font-size: 12px; color: #B45309; line-height: 1.5; margin-top: 4px; font-weight: 500;">Selamat datang! Karena Anda telah memverifikasi identitas menggunakan Nomor WhatsApp terdaftar, Anda kini membuka gerbang privilese (Executive Access) untuk melacak rekam jejak finansial pribadi, kontribusi donasi, serta status pangkat kedisiplinan Anda.</p>
                             </div>
                         </div>
 
                         <div style="display: flex; flex-direction: column; gap: 12px;">
                             
                             <div style="background: var(--surface); border: 1.5px solid var(--border); border-radius: 14px; box-shadow: var(--shadow-sm); overflow: hidden;">
-                                <div style="padding: 16px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; background: var(--surface-hover); transition: background 0.2s;" onclick="togglePanduan('ang', 4, 1, this)">
+                                <div style="padding: 16px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; background: var(--surface-hover); transition: background 0.2s;" onclick="togglePanduan('ang', 5, 1, this)">
                                     <div style="display: flex; align-items: center; gap: 12px;">
-                                        <div style="color: var(--primary); display: flex; align-items: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></div>
-                                        <b style="font-size: 14px; color: var(--text-main);">MENU BERANDA & MUTASI</b>
+                                        <div style="background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%); color: #1D4ED8; width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; border: 1px solid #BFDBFE; flex-shrink: 0;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></div>
+                                        <b style="font-size: 14px; color: var(--text-main);">MENU 1: BERANDA</b>
                                     </div>
-                                    <div style="color: var(--text-muted); display: flex; align-items: center;"><svg id="ic-ang-1" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);"><polyline points="6 9 12 15 18 9"/></svg></div>
+                                    <div style="color: var(--text-muted); display: flex; align-items: center;"><svg id="ic-ang-1" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);"><polyline points="6 9 12 15 18 9"/></svg></div>
                                 </div>
                                 <div id="tut-ang-1" style="display: none; padding: 16px; border-top: 1.5px solid var(--border); background: var(--surface);">
                                     <div style="font-size: 12.5px; color: var(--text-main); line-height: 1.6;">
-                                        <p style="margin-bottom: 8px;">Di menu Beranda, Anda bisa melihat total kekayaan gabungan organisasi saat ini. Kotak Distribusi Kas bisa Anda <b>geser (swipe) ke kiri/kanan</b> untuk melihat ke rekening mana saja uang tersebut dipisahkan.</p>
-                                        <p>Di layar Mutasi <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="display:inline-block; vertical-align:middle; transform:translateY(-1.5px); margin:0 2px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>, Anda bisa melacak jejak aliran dana masuk/keluar. Gunakan kolom pencarian di bagian atas dan <b>ketik Nama Anda</b> untuk melihat status uang Anda yang sedang dipinjam (Talangan) atau uang muka kepanitiaan yang sedang Anda bawa.</p>
+                                        <ul style="padding-left: 16px; margin: 0;">
+                                            <li style="margin-bottom: 8px;"><b>Pantauan Kas Global:</b> Layar utama menampilkan Total Saldo kekayaan gabungan organisasi saat ini secara terbuka.</li>
+                                            <li style="margin-bottom: 8px;"><b>Distribusi Dompet Transparan:</b> Kotak Distribusi Kas di bawah total saldo bisa Anda <b>geser (swipe) ke kiri/kanan</b>. Anda berhak tahu ke laci tunai atau rekening bank mana saja uang organisasi diamankan/dipisahkan.</li>
+                                            <li><b>Widget Analitik FOMO:</b> Pantau Arus Kas bulan ini (Pemasukan vs Pengeluaran) secara *real-time*, serta papan klasemen yang mengapresiasi nama-nama donatur terbaru yang berkontribusi minggu ini.</li>
+                                        </ul>
                                     </div>
                                 </div>
                             </div>
 
                             <div style="background: var(--surface); border: 1.5px solid var(--border); border-radius: 14px; box-shadow: var(--shadow-sm); overflow: hidden;">
-                                <div style="padding: 16px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; background: var(--surface-hover); transition: background 0.2s;" onclick="togglePanduan('ang', 4, 2, this)">
+                                <div style="padding: 16px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; background: var(--surface-hover); transition: background 0.2s;" onclick="togglePanduan('ang', 5, 2, this)">
                                     <div style="display: flex; align-items: center; gap: 12px;">
-                                        <div style="color: var(--primary); display: flex; align-items: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg></div>
-                                        <b style="font-size: 14px; color: var(--text-main);">SISTEM XP & PANGKAT KTA</b>
+                                        <div style="background: linear-gradient(135deg, #F5F3FF 0%, #E9D5FF 100%); color: #7E22CE; width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; border: 1px solid #D8B4FE; flex-shrink: 0;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></div>
+                                        <b style="font-size: 14px; color: var(--text-main);">MENU 2: MUTASI & AUDIT</b>
                                     </div>
-                                    <div style="color: var(--text-muted); display: flex; align-items: center;"><svg id="ic-ang-2" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);"><polyline points="6 9 12 15 18 9"/></svg></div>
+                                    <div style="color: var(--text-muted); display: flex; align-items: center;"><svg id="ic-ang-2" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);"><polyline points="6 9 12 15 18 9"/></svg></div>
                                 </div>
                                 <div id="tut-ang-2" style="display: none; padding: 16px; border-top: 1.5px solid var(--border); background: var(--surface);">
                                     <div style="font-size: 12.5px; color: var(--text-main); line-height: 1.6;">
-                                        <p style="margin-bottom: 8px;"><span class="font-nasa" style="font-size: 1.1em;">NAVASENA</span> menggunakan sistem Pangkat berbasis Kedisiplinan (Gamifikasi). Membayar kas sebelum ganti bulan akan menaikkan XP Anda.</p>
-                                        <p style="margin-bottom: 8px;">Sentuh ikon <b>Perisai Pangkat</b> <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="display:inline-block; vertical-align:middle; transform:translateY(-1.5px); margin:0 2px;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> di samping kiri nama Anda pada daftar untuk membuka preview KTA. Anda akan melihat Progress Bar Pangkat Anda menuju Rank Legend atau Mythical Glory.</p>
-                                        <p><i>Perhatian:</i> Menunggak uang kas akan memotong XP Anda. Jika XP Anda menyentuh angka minus, KTA dan pangkat Anda akan berubah menjadi merah (Status: AFK). Ini adalah sanksi otomatis dari sistem, bukan error pada aplikasi.</p>
+                                        <ul style="padding-left: 16px; margin: 0;">
+                                            <li style="margin-bottom: 8px;">Di menu Mutasi, Anda diberikan posisi sebagai Pengawas (*Read-Only*). Lacak jejak seluruh aliran uang masuk dan keluar layaknya mutasi perbankan profesional.</li>
+                                            <li style="margin-bottom: 8px;"><b>Pelacakan Uang Pribadi:</b> Gunakan kolom pencarian di bagian atas dan <b>ketik Nama Anda</b> secara spesifik. Sistem akan memfilter dan melacak status uang yang sedang Anda talangi untuk acara (Nota Talangan) atau sisa uang muka kepanitiaan yang menjadi tanggung jawab Anda saat ini.</li>
+                                            <li>Buka filter/tab <b>"Mutasi Dana Talangan"</b> untuk mengecek apakah utang kas organisasi kepada anggota sudah terselesaikan atau masih gantung (Pending).</li>
+                                        </ul>
                                     </div>
                                 </div>
                             </div>
 
                             <div style="background: var(--surface); border: 1.5px solid var(--border); border-radius: 14px; box-shadow: var(--shadow-sm); overflow: hidden;">
-                                <div style="padding: 16px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; background: var(--surface-hover); transition: background 0.2s;" onclick="togglePanduan('ang', 4, 3, this)">
+                                <div style="padding: 16px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; background: var(--surface-hover); transition: background 0.2s;" onclick="togglePanduan('ang', 5, 3, this)">
                                     <div style="display: flex; align-items: center; gap: 12px;">
-                                        <div style="color: var(--primary); display: flex; align-items: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
-                                        <b style="font-size: 14px; color: var(--text-main);">MENU PROGRAM (ACARA)</b>
+                                        <div style="background: linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 100%); color: #059669; width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; border: 1px solid #A7F3D0; flex-shrink: 0;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg></div>
+                                        <b style="font-size: 14px; color: var(--text-main);">MENU 3: SISTEM XP & IURAN</b>
                                     </div>
-                                    <div style="color: var(--text-muted); display: flex; align-items: center;"><svg id="ic-ang-3" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);"><polyline points="6 9 12 15 18 9"/></svg></div>
+                                    <div style="color: var(--text-muted); display: flex; align-items: center;"><svg id="ic-ang-3" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);"><polyline points="6 9 12 15 18 9"/></svg></div>
                                 </div>
                                 <div id="tut-ang-3" style="display: none; padding: 16px; border-top: 1.5px solid var(--border); background: var(--surface);">
                                     <div style="font-size: 12.5px; color: var(--text-main); line-height: 1.6;">
-                                        <p>Pada program kegiatan khusus (seperti Tirakatan atau Rekreasi), Anda bisa melacak transparansi anggaran dengan menyentuh blok bertuliskan <span style="font-size:10px; font-weight:800; color:#10B981;">DANA MASUK</span> <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="3" style="display:inline-block; vertical-align:middle; transform:translateY(-1px); margin:0 2px;"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg> atau <span style="font-size:10px; font-weight:800; color:#EF4444;">PENGELUARAN</span> <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="3" style="display:inline-block; vertical-align:middle; transform:translateY(-1px); margin:0 2px;"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg>. Sistem akan membuka lembaran pop-up rincian dari mana saja donasi acara tersebut didapatkan dan ke toko mana saja uangnya dibelanjakan.</p>
+                                        <ul style="padding-left: 16px; margin: 0;">
+                                            <li style="margin-bottom: 8px;"><b>Gamifikasi Kepatuhan:</b> <span class="font-nasa" style="font-size: 1.1em;">NAVASENA</span> menghargai kedisiplinan. Anda akan mendapat Bonus XP tinggi jika membayar iuran lebih awal (sebelum ganti bulan) atau membantu menalangi dana acara secara sukarela.</li>
+                                            <li style="margin-bottom: 8px;"><b>KTA Holografik 3D:</b> Di menu Iuran, sentuh ikon <b>Perisai Pangkat</b> di samping kiri nama Anda. Anda akan disambut oleh KTA 3D yang menampilkan progres XP Anda (Pangkat *Warrior* hingga *Mythical Glory*).</li>
+                                            <li><b>Penalti Otomatis (AFK):</b> <i style="color:var(--danger); font-weight:700;">Hati-hati!</i> Menunggak iuran kas akan menggerus poin XP secara perlahan. Jika Anda tidak disiplin dan nilai XP menyentuh angka minus, sistem tanpa ampun akan menyegel KTA Anda menjadi warna MERAH (Status: AFK/Defisit).</li>
+                                        </ul>
                                     </div>
                                 </div>
                             </div>
 
                             <div style="background: var(--surface); border: 1.5px solid var(--border); border-radius: 14px; box-shadow: var(--shadow-sm); overflow: hidden;">
-                                <div style="padding: 16px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; background: var(--surface-hover); transition: background 0.2s;" onclick="togglePanduan('ang', 4, 4, this)">
+                                <div style="padding: 16px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; background: var(--surface-hover); transition: background 0.2s;" onclick="togglePanduan('ang', 5, 4, this)">
                                     <div style="display: flex; align-items: center; gap: 12px;">
-                                        <div style="color: var(--primary); display: flex; align-items: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
-                                        <b style="font-size: 14px; color: var(--text-main);">PROFIL & REWIND PERSONAL</b>
+                                        <div style="background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%); color: #D97706; width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; border: 1px solid #FCD34D; flex-shrink: 0;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+                                        <b style="font-size: 14px; color: var(--text-main);">MENU 4: PROGRAM (ACARA)</b>
                                     </div>
-                                    <div style="color: var(--text-muted); display: flex; align-items: center;"><svg id="ic-ang-4" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);"><polyline points="6 9 12 15 18 9"/></svg></div>
+                                    <div style="color: var(--text-muted); display: flex; align-items: center;"><svg id="ic-ang-4" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);"><polyline points="6 9 12 15 18 9"/></svg></div>
                                 </div>
                                 <div id="tut-ang-4" style="display: none; padding: 16px; border-top: 1.5px solid var(--border); background: var(--surface);">
                                     <div style="font-size: 12.5px; color: var(--text-main); line-height: 1.6;">
-                                        <ul style="padding-left: 16px;">
-                                            <li style="margin-bottom: 8px;"><b>Executive Billing:</b> Tepat di bawah KTA Profil Anda, terdapat Panel Tagihan. Jika panel tersebut berwarna <b style="color:var(--danger);">Merah</b>, artinya Anda memiliki tanggungan kas yang belum dilunasi. Segera hubungi Bendahara.</li>
-                                            <li style="margin-bottom: 8px;"><b><span class="font-nasa" style="font-size: 1.1em;">NAVASENA</span> Rewind:</b> Sentuh tombol <b>REKAM JEJAK KEUANGAN</b> <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="display:inline-block; vertical-align:middle; transform:translateY(-1.5px); margin:0 2px;"><polygon points="11 19 2 12 11 5 11 19"/><polygon points="22 19 13 12 22 5 22 19"/></svg>. Layar ini merangkum total seluruh sumbangsih kekayaan yang pernah Anda berikan kepada organisasi (Gabungan Total Iuran, Total Donasi, dan Persentase Akurasi Pembayaran) sejak Anda bergabung. Banggalah pada kontribusi Anda.</li>
-                                            <li><b>Kotak Aspirasi Anonim:</b> Di pojok kiri bawah layar, terdapat tombol merah melayang (Ikon Kotak Pesan). Sentuh tombol tersebut untuk mengirimkan saran, kritik, atau teguran ke Bendahara. Pesan Anda dilindungi Enkripsi Anonim sehingga identitas Anda tidak akan pernah diketahui oleh pengurus.</li>
+                                        <ul style="padding-left: 16px; margin: 0;">
+                                            <li style="margin-bottom: 8px;"><b>Audit Transparansi Acara:</b> Pada kartu kepanitiaan (misal: HUT RI atau Tirakatan), Anda berhak membongkar isi anggaran. Sentuh blok berlabel <b style="color:#10B981;">DANA MASUK</b> atau <b style="color:#EF4444;">PENGELUARAN</b>. Sistem akan membuka lembar pop-up rincian dari mana donatur acara tersebut berasal dan ke toko mana saja uangnya dibelanjakan (Detail Nota).</li>
+                                            <li><b>Hak Pengawasan Panitia (PJ):</b> Pastikan Anda juga memeriksa bagian <i>"Dana Di Bawa PJ"</i>. Jika ada saldo yang masih tercetak di sana, berarti ada Panitia Acara yang belum menyelesaikan LPJ atau belum melaporkan/mengembalikan sisa uang operasional kembali ke tangan Bendahara Induk.</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div style="background: var(--surface); border: 1.5px solid var(--border); border-radius: 14px; box-shadow: var(--shadow-sm); overflow: hidden;">
+                                <div style="padding: 16px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; background: var(--surface-hover); transition: background 0.2s;" onclick="togglePanduan('ang', 5, 5, this)">
+                                    <div style="display: flex; align-items: center; gap: 12px;">
+                                        <div style="background: linear-gradient(135deg, #F8FAFC 0%, #E2E8F0 100%); color: #475569; width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; border: 1px solid #CBD5E1; flex-shrink: 0;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+                                        <b style="font-size: 14px; color: var(--text-main);">MENU 5: PROFIL & REWIND</b>
+                                    </div>
+                                    <div style="color: var(--text-muted); display: flex; align-items: center;"><svg id="ic-ang-5" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);"><polyline points="6 9 12 15 18 9"/></svg></div>
+                                </div>
+                                <div id="tut-ang-5" style="display: none; padding: 16px; border-top: 1.5px solid var(--border); background: var(--surface);">
+                                    <div style="font-size: 12.5px; color: var(--text-main); line-height: 1.6;">
+                                        <ul style="padding-left: 16px; margin: 0;">
+                                            <li style="margin-bottom: 8px;"><b>Executive Billing:</b> Tepat di bawah informasi Profil Anda, ada Panel Penagihan Cerdas. Jika panel tersebut berwarna <b style="color:var(--danger);">Merah Terang</b>, itu berarti Anda memiliki tunggakan/kewajiban kas yang mendesak untuk dilunasi bulan ini.</li>
+                                            <li style="margin-bottom: 8px;"><b><span class="font-nasa" style="font-size: 1.1em;">NAVASENA</span> Rewind:</b> Kebanggaan finansial Anda. Sentuh tombol <b>REKAM JEJAK KEUANGAN</b> untuk membuka ulasan (Rewind) yang mengakumulasi total seluruh sumbangsih kekayaan (Gabungan Total Iuran, Donasi Khusus, dan Akurasi Kepatuhan) yang pernah Anda berikan sejak hari pertama didaftarkan.</li>
+                                            <li><b>Kotak Suara (Aspirasi Rahasia):</b> Butuh privasi? Di pojok kiri bawah layar, ada tombol merah melayang berbentuk kotak pesan. Kirim kritik, saran, atau laporan kejanggalan ke pengurus melalui fitur ini. Pesan Anda dilindungi <b>Sistem Enkripsi Anonim</b> (Identitas/Nama pengirim dikunci rapat dari Bendahara sekalipun).</li>
                                         </ul>
                                     </div>
                                 </div>
@@ -5533,86 +5595,111 @@
                     <!-- PANDUAN WARGA -->
                     <div id="sop-warga" style="display: none;">
                         <div style="background: #EFF6FF; border-left: 5px solid #3B82F6; padding: 16px; margin-bottom: 24px; border-radius: 12px; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.08); display: flex; gap: 12px; align-items: flex-start;">
-                            <div style="background: #3B82F6; color: white; width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px;">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M12 12v9"/><path d="m8 17 4 4 4-4"/></svg>
+                            <div style="background: linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%); color: white; width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3); margin-top: 2px;">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M12 12v9"/><path d="m8 17 4 4 4-4"/></svg>
                             </div>
                             <div>
-                                <b style="color: #1E3A8A; font-size: 14px; text-transform: uppercase;">WAJIB: TARIK DATA TERBARU</b>
-                                <p style="font-size: 12px; color: #1E40AF; line-height: 1.5; margin-top: 4px; font-weight: 500;">Selamat datang di Portal Transparansi Publik. Jika Anda membuka aplikasi ini dari Perangkat Pribadi, Anda <b>WAJIB</b> menyentuh tombol <b>LOAD</b> <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="display:inline-block; vertical-align:middle; transform:translateY(-1px); margin:0 2px;"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M12 12v9"/><path d="m8 17 4 4 4-4"/></svg> di pojok kanan atas sebelum mulai mengawasi data. Ini memastikan layar Anda menarik dan menampilkan laporan keuangan paling mutakhir langsung dari Pusat.</p>
+                                <b style="color: #1E3A8A; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px;">WAJIB: TARIK DATA TERBARU</b>
+                                <p style="font-size: 12px; color: #1E40AF; line-height: 1.5; margin-top: 4px; font-weight: 500;">Selamat datang di Portal Transparansi Publik. Jika Anda membuka aplikasi ini dari Perangkat Pribadi / HP Sendiri, Anda <b>WAJIB</b> menyentuh tombol <b>LOAD (Awan)</b> <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="display:inline-block; vertical-align:middle; transform:translateY(-1.5px);"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M12 12v9"/><path d="m8 17 4 4 4-4"/></svg> di pojok kanan atas layar. Langkah krusial ini memastikan HP Anda menarik nota dan saldo paling mutakhir langsung dari brankas Server Pusat sebelum Anda melakukan pengawasan.</p>
                             </div>
                         </div>
 
                         <div style="display: flex; flex-direction: column; gap: 12px;">
                             
                             <div style="background: var(--surface); border: 1.5px solid var(--border); border-radius: 14px; box-shadow: var(--shadow-sm); overflow: hidden;">
-                                <div style="padding: 16px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; background: var(--surface-hover); transition: background 0.2s;" onclick="togglePanduan('wrg', 4, 1, this)">
+                                <div style="padding: 16px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; background: var(--surface-hover); transition: background 0.2s;" onclick="togglePanduan('wrg', 5, 1, this)">
                                     <div style="display: flex; align-items: center; gap: 12px;">
-                                        <div style="color: var(--primary); display: flex; align-items: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></div>
-                                        <b style="font-size: 14px; color: var(--text-main);">MENU BERANDA & MUTASI</b>
+                                        <div style="background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%); color: #1D4ED8; width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; border: 1px solid #BFDBFE; flex-shrink: 0;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></div>
+                                        <b style="font-size: 14px; color: var(--text-main);">MENU 1: BERANDA</b>
                                     </div>
-                                    <div style="color: var(--text-muted); display: flex; align-items: center;"><svg id="ic-wrg-1" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);"><polyline points="6 9 12 15 18 9"/></svg></div>
+                                    <div style="color: var(--text-muted); display: flex; align-items: center;"><svg id="ic-wrg-1" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);"><polyline points="6 9 12 15 18 9"/></svg></div>
                                 </div>
                                 <div id="tut-wrg-1" style="display: none; padding: 16px; border-top: 1.5px solid var(--border); background: var(--surface);">
                                     <div style="font-size: 12.5px; color: var(--text-main); line-height: 1.6;">
-                                        <p style="margin-bottom: 8px;"><b>Total Saldo:</b> Menampilkan kekayaan murni keseluruhan organisasi saat ini. Gulir (Swipe) blok "Distribusi Kas" ke samping untuk mengecek apakah uang tersebut disimpan di laci tunai atau di rekening bank.</p>
-                                        <p><b>Audit Publik:</b> Buka Menu Mutasi <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="display:inline-block; vertical-align:middle; transform:translateY(-1.5px); margin:0 2px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg> untuk melacak uang masuk dan keluar secara mendetail. Seluruh data di layar ini dikunci menggunakan teknologi <i>V-HASH</i> (Cap Waktu Otentik) dan tidak dapat dimanipulasi oleh pengunjung. Sentuh kotak <b>Pencarian</b> untuk melacak nama penyumbang atau nota spesifik dari masa lalu.</p>
+                                        <ul style="padding-left: 16px; margin: 0;">
+                                            <li style="margin-bottom: 8px;"><b>Pantauan Saldo Murni:</b> Di layar ini Warga diposisikan sebagai Pengawas (Hak Akses *Read-Only*). Anda bisa melihat rincian kekayaan kas murni pemuda secara transparan di tampilan paling atas.</li>
+                                            <li style="margin-bottom: 8px;"><b>Lacak Penyimpanan Uang:</b> Di bawah total saldo, terdapat kotak panjang berjejer. Geser (*swipe*) kotak-kotak "Distribusi Kas" tersebut ke kiri/kanan untuk mengecek dengan persis apakah uang kas diamankan di Rekening Bank atau disimpan secara tunai.</li>
+                                            <li><b>Widget FOMO (Apresiasi Instan):</b> Bagian bawah Beranda menampilkan secara langsung siapa-siapa saja donatur tercepat yang berkontribusi minggu ini ke dalam sistem.</li>
+                                        </ul>
                                     </div>
                                 </div>
                             </div>
 
                             <div style="background: var(--surface); border: 1.5px solid var(--border); border-radius: 14px; box-shadow: var(--shadow-sm); overflow: hidden;">
-                                <div style="padding: 16px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; background: var(--surface-hover); transition: background 0.2s;" onclick="togglePanduan('wrg', 4, 2, this)">
+                                <div style="padding: 16px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; background: var(--surface-hover); transition: background 0.2s;" onclick="togglePanduan('wrg', 5, 2, this)">
                                     <div style="display: flex; align-items: center; gap: 12px;">
-                                        <div style="color: var(--primary); display: flex; align-items: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg></div>
-                                        <b style="font-size: 14px; color: var(--text-main);">MENU IURAN & KEPATUHAN</b>
+                                        <div style="background: linear-gradient(135deg, #F5F3FF 0%, #E9D5FF 100%); color: #7E22CE; width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; border: 1px solid #D8B4FE; flex-shrink: 0;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></div>
+                                        <b style="font-size: 14px; color: var(--text-main);">MENU 2: AUDIT MUTASI</b>
                                     </div>
-                                    <div style="color: var(--text-muted); display: flex; align-items: center;"><svg id="ic-wrg-2" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);"><polyline points="6 9 12 15 18 9"/></svg></div>
+                                    <div style="color: var(--text-muted); display: flex; align-items: center;"><svg id="ic-wrg-2" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);"><polyline points="6 9 12 15 18 9"/></svg></div>
                                 </div>
                                 <div id="tut-wrg-2" style="display: none; padding: 16px; border-top: 1.5px solid var(--border); background: var(--surface);">
                                     <div style="font-size: 12.5px; color: var(--text-main); line-height: 1.6;">
-                                        <p>Menu ini menyajikan <i>Heatmap</i> (Peta Warna) kedisiplinan pembayaran uang kas bulanan bagi seluruh anggota yang terdaftar. Kotak berwarna <b>Merah</b> berarti menunggak, kotak <b>Hijau</b> berarti lunas tepat waktu, dan kotak <b>Kuning/Emas</b> berarti melunasi di awal (*Advance Payment*). Setiap anggota juga diberikan Gelar/Pangkat e-sports secara otomatis berdasarkan level kedisiplinan mereka dalam melunasi kas.</p>
+                                        <ul style="padding-left: 16px; margin: 0;">
+                                            <li style="margin-bottom: 8px;"><b>Lacak Arus Dana:</b> Menu Mutasi menyajikan seluruh riwayat nota masuk (hijau) dan keluar (hitam) dari dompet Karang Taruna secara kronologis dan tidak bisa ditutup-tutupi. Gunakan kotak <b>Pencarian</b> untuk melacak nama penyumbang atau nota spesifik dengan instan.</li>
+                                            <li><b>Sertifikasi V-HASH:</b> Jangan khawatir uang diselewengkan. Anda akan melihat label <b>V-HASH</b> kecil bertuliskan detik waktu persis di bawah setiap nota pengeluaran di menu ini. Cap Waktu Otentik *Blockchain-style* ini menjamin data direkam secara riil (di waktu nyata) dan terbukti bukan pengeluaran buatan atau manipulasi rekayasa.</li>
+                                        </ul>
                                     </div>
                                 </div>
                             </div>
 
                             <div style="background: var(--surface); border: 1.5px solid var(--border); border-radius: 14px; box-shadow: var(--shadow-sm); overflow: hidden;">
-                                <div style="padding: 16px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; background: var(--surface-hover); transition: background 0.2s;" onclick="togglePanduan('wrg', 4, 3, this)">
+                                <div style="padding: 16px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; background: var(--surface-hover); transition: background 0.2s;" onclick="togglePanduan('wrg', 5, 3, this)">
                                     <div style="display: flex; align-items: center; gap: 12px;">
-                                        <div style="color: var(--primary); display: flex; align-items: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
-                                        <b style="font-size: 14px; color: var(--text-main);">MENU PROGRAM (ACARA)</b>
+                                        <div style="background: linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 100%); color: #059669; width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; border: 1px solid #A7F3D0; flex-shrink: 0;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg></div>
+                                        <b style="font-size: 14px; color: var(--text-main);">MENU 3: PETA KEPATUHAN</b>
                                     </div>
-                                    <div style="color: var(--text-muted); display: flex; align-items: center;"><svg id="ic-wrg-3" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);"><polyline points="6 9 12 15 18 9"/></svg></div>
+                                    <div style="color: var(--text-muted); display: flex; align-items: center;"><svg id="ic-wrg-3" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);"><polyline points="6 9 12 15 18 9"/></svg></div>
                                 </div>
                                 <div id="tut-wrg-3" style="display: none; padding: 16px; border-top: 1.5px solid var(--border); background: var(--surface);">
                                     <div style="font-size: 12.5px; color: var(--text-main); line-height: 1.6;">
-                                        <p style="margin-bottom: 8px;">Transparansi Acara Khusus: Anda bisa menyentuh blok <span style="font-size:10px; font-weight:800; color:#10B981;">DANA MASUK</span> <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="3" style="display:inline-block; vertical-align:middle; transform:translateY(-1px); margin:0 2px;"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg> atau <span style="font-size:10px; font-weight:800; color:#EF4444;">PENGELUARAN</span> <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="3" style="display:inline-block; vertical-align:middle; transform:translateY(-1px); margin:0 2px;"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg> untuk mengaudit secara terbuka daftar nota pembelian (Konsumsi, MMT, dsb) secara mendetail.</p>
-                                        <p>Anda juga memiliki hak pengawasan atas uang panitia. Melalui fitur "Dana Di Bawa PJ", Anda dapat memantau jika ada sisa uang operasional acara yang belum dilaporkan kembali ke tangan Bendahara Induk.</p>
+                                        <ul style="padding-left: 16px; margin: 0;">
+                                            <li style="margin-bottom: 8px;"><b>Heatmap Kedisiplinan:</b> Di menu Iuran, Warga dipersilakan mengawasi kedisiplinan dan kekompakan finansial pemuda. Lihat baris bulan di nama anggota. <b style="color:var(--danger);">Merah:</b> Artinya ia menunggak / utang. <b style="color:var(--success);">Hijau:</b> Lunas tepat waktu. <b style="color:#F59E0B;">Emas Terang:</b> Lunas bayar di muka untuk bulan depan (*Advance Payer*).</li>
+                                            <li><b>Apresiasi E-Sports:</b> Sebagai bentuk penghargaan publik, setiap anggota dikategorikan dengan label pangkat RPG Gamifikasi (*Warrior* hingga *Mythical Glory*) berdasarkan besarnya nilai kontribusi dan kedisiplinan pelunasan kas mereka.</li>
+                                        </ul>
                                     </div>
                                 </div>
                             </div>
 
                             <div style="background: var(--surface); border: 1.5px solid var(--border); border-radius: 14px; box-shadow: var(--shadow-sm); overflow: hidden;">
-                                <div style="padding: 16px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; background: var(--surface-hover); transition: background 0.2s;" onclick="togglePanduan('wrg', 4, 4, this)">
+                                <div style="padding: 16px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; background: var(--surface-hover); transition: background 0.2s;" onclick="togglePanduan('wrg', 5, 4, this)">
                                     <div style="display: flex; align-items: center; gap: 12px;">
-                                        <div style="color: var(--primary); display: flex; align-items: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
-                                        <b style="font-size: 14px; color: var(--text-main);">PROFIL & PENGADUAN</b>
+                                        <div style="background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%); color: #D97706; width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; border: 1px solid #FCD34D; flex-shrink: 0;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+                                        <b style="font-size: 14px; color: var(--text-main);">MENU 4: TRANSPARANSI ACARA</b>
                                     </div>
-                                    <div style="color: var(--text-muted); display: flex; align-items: center;"><svg id="ic-wrg-4" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);"><polyline points="6 9 12 15 18 9"/></svg></div>
+                                    <div style="color: var(--text-muted); display: flex; align-items: center;"><svg id="ic-wrg-4" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);"><polyline points="6 9 12 15 18 9"/></svg></div>
                                 </div>
                                 <div id="tut-wrg-4" style="display: none; padding: 16px; border-top: 1.5px solid var(--border); background: var(--surface);">
                                     <div style="font-size: 12.5px; color: var(--text-main); line-height: 1.6;">
-                                        <ul style="padding-left: 16px;">
-                                            <li style="margin-bottom: 8px;"><b>Kotak Suara (Aspirasi Rahasia):</b> Perhatikan tombol merah melayang berbentuk kotak pesan <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="display:inline-block; vertical-align:middle; transform:translateY(-1px); margin:0 2px;"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg> di pojok kiri bawah layar Anda. Sentuh tombol tersebut untuk mengirimkan saran, teguran, atau laporan penyalahgunaan. Sistem ini menerapkan Enkripsi Anonim sehingga identitas (Nama/Device) Anda tidak akan pernah diketahui oleh siapapun, termasuk Bendahara yang menerima pesan tersebut.</li>
-                                            <li><b>Portal Login:</b> Jika Anda merupakan Anggota resmi organisasi dan nomor WA Anda telah didaftarkan oleh admin, Anda bisa keluar dari halaman Publik ini dengan menyentuh tombol "Keluar" di bagian bawah profil, lalu masuk kembali dengan memverifikasi Nomor WhatsApp Anda untuk membuka KTA Anda sendiri.</li>
+                                        <ul style="padding-left: 16px; margin: 0;">
+                                            <li style="margin-bottom: 8px;"><b>Bongkar Detail Nota Acara:</b> Saat Karang Taruna menggelar hajatan besar (contoh: 17 Agustus atau Tirakatan), warga bisa memantau pergerakan anggaran acara di Menu Program. Sentuh blok indikator <b style="color:#10B981;">DANA MASUK</b> atau <b style="color:#EF4444;">PENGELUARAN</b> untuk mengaudit kemana saja uang donasi warga dibelanjakan (Detail Pembelian Konsumsi, Sewa Tenda, dll) hingga ke uang terkecil secara mendalam.</li>
+                                            <li><b>Audit Dompet Panitia:</b> Warga diizinkan memeriksa bagian *"Dana Di Bawa PJ"* di dalam program. Jika masih ada saldo, artinya Panitia pelaksana acara belum tuntas melaporkan/mengembalikan sisa uang gantung tersebut kembali ke dompet Bendahara Pusat.</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div style="background: var(--surface); border: 1.5px solid var(--border); border-radius: 14px; box-shadow: var(--shadow-sm); overflow: hidden;">
+                                <div style="padding: 16px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; background: var(--surface-hover); transition: background 0.2s;" onclick="togglePanduan('wrg', 5, 5, this)">
+                                    <div style="display: flex; align-items: center; gap: 12px;">
+                                        <div style="background: linear-gradient(135deg, #F8FAFC 0%, #E2E8F0 100%); color: #475569; width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; border: 1px solid #CBD5E1; flex-shrink: 0;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+                                        <b style="font-size: 14px; color: var(--text-main);">MENU 5: PROFIL & PENGADUAN</b>
+                                    </div>
+                                    <div style="color: var(--text-muted); display: flex; align-items: center;"><svg id="ic-wrg-5" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);"><polyline points="6 9 12 15 18 9"/></svg></div>
+                                </div>
+                                <div id="tut-wrg-5" style="display: none; padding: 16px; border-top: 1.5px solid var(--border); background: var(--surface);">
+                                    <div style="font-size: 12.5px; color: var(--text-main); line-height: 1.6;">
+                                        <ul style="padding-left: 16px; margin: 0;">
+                                            <li style="margin-bottom: 8px;"><b>Apresiasi Donatur Luar (Honorary):</b> Masuklah ke Menu Profil. Perhatikan tumpukan kartu Bank Holografik (Black Card / Sapphire Card). Kartu tersebut adalah monumen penghormatan khusus bagi donatur Pihak Luar (Warga RT Umum / Instansi / Individu Non-Anggota) yang telah memercayakan dan menyumbang dana terbesar pada tahun berjalan.</li>
+                                            <li style="margin-bottom: 8px;"><b>Direktori & Mading:</b> Anda bisa melihat statistik rekapitulasi data anggota (SDM) dan mengakses Direktori Pengurus (Executive Desk) untuk menyimpan nomor Kontak Divisi Kepanitiaan penting yang sedang bertugas.</li>
+                                            <li style="margin-bottom: 8px;"><b>Saluran Aspirasi Anonim:</b> Terdapat tombol merah melayang (Ikon Kotak Pesan) di pojok kiri bawah. Warga bisa leluasa mengirimkan kritik, saran, teguran, hingga laporan kejanggalan kas tanpa takut diintimidasi. Sistem dijamin dengan **Enkripsi Anonim** mutlak sehingga nama/nomor warga disembunyikan secara total dari Bendahara yang membaca pesan.</li>
+                                            <li><b>Portal Autentikasi:</b> Tekan tombol "Keluar" bergaris merah di bagian paling bawah untuk kembali ke halaman Otorisasi/Login jika Anda adalah salah satu anggota yang ingin memasukkan Nomor WA terdaftar dan membuka KTA Pribadi Anda.</li>
                                         </ul>
                                   </div>
                                </div>
                             </div>
                         </div>
                     </div>
-                  </div>
-               </div>
-            </div>
 
             <!-- MODAL KLASEMEN DONASI -->
             <div id="mod-donasi-list" class="modal">
