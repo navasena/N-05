@@ -89,7 +89,8 @@
         }
 
         body.modal-open { overflow: hidden; }
-        .modal { overscroll-behavior: contain; }
+        .modal { /* Reset */ }
+        .modal-box { overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
 
         /* HARDCORE ANTI-GOOGLE SEARCH / TOUCH CALLOUT SYSTEM */
         body, .no-select, .i-cell, .btn, .nav-item, .header-btn, .trx-card, .iuran-user-head, .chip, .fab, .close-modal, .logo-wrapper, .custom-select, .option-item, .summary-card {
@@ -643,14 +644,8 @@
             try {
 
                 // ANTI ELASTIC PULL-TO-REFRESH (JS SHIELD) - ROBUST BODY SCROLL
-                let _startY = 0;
-                document.addEventListener('touchstart', e => { _startY = e.touches[0].pageY; }, {passive: true});
-                document.addEventListener('touchmove', e => {
-                    if (document.body.classList.contains('modal-open')) return;
-                    
-                    // SURGICAL FIX: Perintah e.preventDefault() telah DIMUSNAHKAN. 
-                    // Atribut overscroll-behavior di CSS sudah cukup untuk mengamankan UI.
-                }, {passive: false});
+                // [SURGICAL FIX] Listener touchmove dengan passive: false telah dihancurkan total.
+                // Scroll kini dikembalikan 100% ke Hardware-Acceleration OS.
 
                 // SURGICAL FIX: THE PHOENIX PROTOCOL (OS SUSPENSION RESURRECTION)
                 // Memastikan koneksi IDB dibangkitkan ulang jika OS membunuh proses saat aplikasi disembunyikan
@@ -2080,7 +2075,7 @@
                     let ag = state.anggota.find(a => a.id === t.id_anggota);
                     let namaPJ = ag ? esc(ag.nama).toUpperCase() : 'ANONIM';
                     if (t.status === 'lunas') {
-                        identitasTeks = t.ket.includes('[TALANGAN') ? `Penyelesaian Talangan: ${namaPJ}` : `Uang Muka Selesai: ${namaPJ}`;
+                        identitasTeks = String(t.ket || '').includes('[TALANGAN') ? `Penyelesaian Talangan: ${namaPJ}` : `Uang Muka Selesai: ${namaPJ}`;
                     } else if (t.status === 'talangan') {
                         identitasTeks = `Ditalangi oleh: ${namaPJ}`;
                     } else {
@@ -2586,7 +2581,7 @@
                         if (aBday !== bBday) return aBday - bBday; 
                         if (a.id === meId) return -1;
                         if (b.id === meId) return 1;
-                        return a.nama.localeCompare(b.nama);
+                        return String(a.nama || '').localeCompare(String(b.nama || ''));
                     });
 
                     // Engine MVP (Penyetor Pertama Bulan Ini)
@@ -2676,7 +2671,9 @@
                                 ${confettiString}
                                 <div class="iuran-user-head no-select" style="padding: 16px; position: relative; z-index: 2; display: flex; justify-content: space-between; align-items: center;" onclick="toggleIuranAccordion('${ag.id}')">
                                     <div style="display:flex; align-items:center; gap:14px; flex: 1; min-width: 0;">
-                                        <div class="rank-shield ${ag.rank_class}" style="width: 44px; height: 44px; flex-shrink: 0; cursor: pointer; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15));" onclick="event.stopPropagation(); if(typeof previewKTA === 'function') previewKTA('${ag.id}')" title="Lihat KTA"></div>
+
+                                        <div class="rank-shield ${ag.rank_class}" style="width: 44px; height: 44px; flex-shrink: 0; cursor: pointer; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15));" onclick="try{event.stopPropagation();}catch(e){} window.previewKTA('${ag.id}')" title="Lihat KTA"></div>
+
                                         <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center;">
                                             <div style="display: flex; align-items: center; margin-bottom: 4px; width: 100%; overflow: hidden;">
                                                 <div style="font-size: 15px; font-weight: 900; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 0 1 auto; letter-spacing: -0.3px;">${esc(ag.nama)}</div>
@@ -2744,9 +2741,12 @@
                             html += `
                             <div class="no-select widget-anggota iuran-user" style="${bCol} position: relative; overflow: hidden; ${bdayGlowStylePublic} border-radius: 20px; margin-bottom: 12px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); padding: 0;">
                                 ${confettiString}
+
                                 <div class="iuran-user-head" style="display: flex; justify-content: space-between; align-items: center; padding: 16px; position: relative; z-index: 2; cursor: pointer; transition: background 0.2s;" onclick="toggleIuranAccordion('${ag.id}')">
                                     <div style="display: flex; align-items: center; gap: 14px; flex: 1; min-width: 0;">
-                                        <div class="rank-shield ${ag.rank_class}" style="width: 44px; height: 44px; cursor: pointer; flex-shrink: 0; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15)); transition: 0.2s;" onclick="event.stopPropagation(); if(typeof previewKTA === 'function') previewKTA('${ag.id}')" title="Lihat KTA"></div>
+
+                                        <div class="rank-shield ${ag.rank_class}" style="width: 44px; height: 44px; cursor: pointer; flex-shrink: 0; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15)); transition: 0.2s;" onclick="try{event.stopPropagation();}catch(e){} window.previewKTA('${ag.id}')" title="Lihat KTA"></div>
+
                                         <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center;">
                                             <div style="display: flex; align-items: center; margin-bottom: 4px; width: 100%; overflow: hidden;">
                                                 <div style="font-size: 15px; font-weight: 900; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 0 1 auto; letter-spacing: -0.3px;">${esc(ag.nama)}</div>
@@ -2869,10 +2869,14 @@
                 void cardEl.offsetWidth; // TRICK MUTLAK: Paksa eksekusi DOM Frame
                 cardEl.style.transition = ''; // Nyalakan kembali transisi
                 
+                let modElKTA = document.getElementById('mod-kta-preview');
+                if (modElKTA) document.body.appendChild(modElKTA);
+
                 if(typeof openModal === 'function') openModal('mod-kta-preview');
 
                 // 5. Picu Animasi Bar & 3D Flip secara Asynchronous
                 setTimeout(() => {
+
                     cardEl.classList.add('flipped-in');
                     bar.style.transition = 'width 1.2s cubic-bezier(0.4, 0, 0.2, 1) 0.5s'; 
                     bar.style.width = `${targetPct}%`;
@@ -3195,7 +3199,7 @@
         
         <!-- MODAL DIREKTORI PENGURUS -->
         <div id="mod-direktori" class="modal">
-            <div class="modal-box" style="background: var(--bg); padding: 0; display: flex; flex-direction: column; max-height: 85vh;">
+            <div class="modal-box" style="background: var(--bg); padding: 0; display: flex; flex-direction: column; max-height: 85vh; overflow: hidden;">
                 <div style="background: var(--surface); padding: 20px 24px 16px 24px; position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--border); border-radius: 24px 24px 0 0;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
                         <h3 style="font-size: 18px; font-weight: 900; color: var(--primary); display: flex; align-items: center; gap: 8px;">
@@ -3413,23 +3417,23 @@
                             
                             <div class="form-group" style="margin-bottom: 20px;">
                                 <label style="font-size: 11px; font-weight: 800; color: var(--text-main); display: flex; justify-content: space-between; align-items: center;">
-                                    <span>Papan Pengumuman Global</span>
-                                    <span style="font-size: 9px; color: #EF4444; background: #FEE2E2; padding: 2px 6px; border-radius: 4px;">TICKER OVERRIDE</span>
+                                    <span>Papan Pengumuman</span>
+                                    <span style="font-size: 9px; color: #EF4444; background: #FEE2E2; padding: 2px 6px; border-radius: 4px;">Running Text</span>
                                 </label>
-                                <textarea id="set-ticker-msg" rows="3" placeholder="Ketik pengumuman penting di sini...&#10;(Kosongkan kotak ini untuk mengembalikan ticker ke mode otomatis Donasi & MVP)" style="line-height: 1.5; font-size: 13px; font-weight: 600; background: #F8FAFC; border: 1.5px solid #E2E8F0; border-radius: 12px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.03); resize: none;"></textarea>
+                                <textarea id="set-ticker-msg" rows="3" placeholder="Tulis pengumuman di sini.&#10;(Hapus pengumuman untuk kembali otomatis menampilkan Donasi & MVP Anggota)" style="line-height: 1.5; font-size: 13px; font-weight: 600; background: #F8FAFC; border: 1.5px solid #E2E8F0; border-radius: 12px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.03); resize: none;"></textarea>
                             </div>
 
                             <div class="ios-item no-select" style="background: #F8FAFC; border: 1.5px solid #E2E8F0; border-radius: 12px; padding: 12px 16px; margin-bottom: 20px;" onclick="closeModal('mod-settings'); openModal('mod-dompet')">
                                 <div class="ios-icon" style="background: #FFFBEB; color: #D97706; border: 1px solid #FDE68A; margin-right: 12px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
                                 <div style="flex: 1;">
                                     <div style="font-size: 13px; font-weight: 800; color: var(--text-main);">Kelola Dompet Kas</div>
-                                    <div style="font-size: 10px; font-weight: 600; color: var(--text-muted);">Buat dan atur rekening kas/bank</div>
+                                    <div style="font-size: 10px; font-weight: 600; color: var(--text-muted);">Buat Dompet Baru</div>
                                 </div>
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#CBD5E1" stroke-width="3"><polyline points="9 18 15 12 9 6"/></svg>
                             </div>
 
                             <div class="form-group" style="margin-bottom: 4px;">
-                                <label style="font-size: 11px; font-weight: 800; color: var(--text-main);">Tarif Iuran Wajib Bulanan</label>
+                                <label style="font-size: 11px; font-weight: 800; color: var(--text-main);">Tarif Iuran Wajib /Bulanan</label>
                                 <div style="display: flex; align-items: center; border: 1.5px solid var(--border); border-radius: 12px; overflow: hidden; background: var(--surface); box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); transition: 0.3s;" id="wrap-iuran-set">
                                     <div style="background: #F1F5F9; color: #64748B; font-weight: 900; font-size: 14px; padding: 16px; border-right: 1.5px solid var(--border);">Rp</div>
                                     <input type="tel" id="set-iuran-nom" placeholder="10.000" oninput="formatRupiah(this)" style="font-size: 22px; font-weight: 900; color: var(--text-main); border: none; box-shadow: none; border-radius: 0; padding: 16px; height: auto;" onfocus="document.getElementById('wrap-iuran-set').style.borderColor='var(--primary)'; document.getElementById('wrap-iuran-set').style.boxShadow='0 0 0 3px rgba(30, 58, 138, 0.1)';" onblur="document.getElementById('wrap-iuran-set').style.borderColor='var(--border)'; document.getElementById('wrap-iuran-set').style.boxShadow='inset 0 2px 4px rgba(0,0,0,0.02)';">
@@ -3534,7 +3538,7 @@
                     </h3>
                     <p style="font-size: 11px; font-weight: 600; color: var(--text-muted); margin-top: 6px;">Transaksi yang dibatalkan tersimpan di sini. Pemulihan akan diverifikasi oleh sistem proteksi kas.</p>
                 </div>
-                <div id="recycle-list" style="padding: 20px; max-height: 60vh; overflow-y: auto;"></div>
+                <div id="recycle-list" style="padding: 20px;"></div>
             </div>
         </div>
 
@@ -3550,7 +3554,7 @@
                     </div>
                     <button class="close-modal" style="position: static;" onclick="closeModal('mod-inbox')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
                 </div>
-                <div id="inbox-list" style="padding: 20px; max-height: 65vh; overflow-y: auto;"></div>
+                <div id="inbox-list" style="padding: 20px;"></div>
             </div>
         </div>
 
@@ -3573,10 +3577,8 @@
 
             <div class="modal-box no-select" style="overflow: visible; margin-top: 25px; background: linear-gradient(180deg, #1E293B 0%, #0F172A 100%); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 28px; text-align: center; max-width: 340px; display: flex; flex-direction: column; align-items: center; padding: 60px 24px 24px 24px; position: relative; box-shadow: 0 40px 80px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.1);">
 
-                <div style="position: absolute; top: -75px; left: 50%; transform: translateX(-50%); width: 160px; height: 160px; background: rgba(59, 130, 246, 0.3); filter: blur(35px); border-radius: 50%; z-index: 0; pointer-events: none;"></div>
-
-                <!-- SURGICAL FIX: Standalone Logo Protocol & Anti-Collision Space (Scaled Up) -->
-                <div style="position: absolute; top: -80px; left: 50%; transform: translateX(-50%); width: 155px; height: 155px; z-index: 1; display: flex; align-items: center; justify-content: center;">
+                <!-- SURGICAL FIX: Presisi Logo Matematis dengan SPASI LEGA (Glow Dihapus) -->
+                <div style="position: absolute; top: -50px; left: 50%; transform: translateX(-50%); width: 160px; height: 160px; z-index: 1; display: flex; align-items: center; justify-content: center;">
                     <img src="icon-512.png" alt="Logo" style="width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 15px 25px rgba(0,0,0,0.6));" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                     <div style="display:none; font-weight: 900; font-size: 64px; color: #FFFFFF; text-shadow: 0 10px 20px rgba(0,0,0,0.5);">N</div>
                 </div>
@@ -4224,8 +4226,8 @@
                                 pjTrx.forEach(t => {
                                     if (t.tipe === 'masuk') {
                                         dIn += t.nom_final;
-                                        if (t.kat === 'Transfer Internal' && t.ket.includes('Terima dari Kas Induk:')) {
-                                            purposeText = t.ket.replace('Terima dari Kas Induk: ', '').trim();
+                                        if (t.kat === 'Transfer Internal' && String(t.ket || '').includes('Terima dari Kas Induk:')) {
+                                            purposeText = String(t.ket || '').replace('Terima dari Kas Induk: ', '').trim();
                                         }
                                     }
                                     if (t.tipe === 'keluar') dOut += (t.status === 'pending' || t.status === 'talangan' ? t.nom_awal : t.nom_final);
@@ -4275,17 +4277,18 @@
                             </div>` : '<div style="margin-bottom: 20px; border-bottom: 1.5px dashed #E2E8F0;"></div>'}
 
                             <div style="display: flex; gap: 12px; margin-bottom: 16px;">
-                                <div style="flex: 1; background: #F8FAFC; border: 1px solid #F1F5F9; border-radius: 14px; padding: 14px; cursor: pointer; transition: 0.2s;" onmouseover="this.style.background='#F1F5F9'" onmouseout="this.style.background='#F8FAFC'" onclick="if(typeof openDrillDown === 'function') openDrillDown('${ev.id}', 'TERKUMPUL')">
+                                <div style="flex: 1; background: #F8FAFC; border: 1px solid #F1F5F9; border-radius: 14px; padding: 14px; cursor: pointer; transition: 0.2s;" onmouseover="this.style.background='#F1F5F9'" onmouseout="this.style.background='#F8FAFC'" onclick="window.openDrillDown('${ev.id}', 'TERKUMPUL')">
                                     <div style="font-size: 10px; font-weight: 800; color: #64748B; margin-bottom: 6px; text-transform: uppercase; display: flex; align-items: center; gap: 4px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="3"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg> DANA MASUK</div>
                                     <div style="font-size: 15px; font-weight: 900; color: #0F172A; letter-spacing: -0.5px;">Rp ${fmtRp(inAmt)}</div>
                                 </div>
-                                <div style="flex: 1; background: #F8FAFC; border: 1px solid #F1F5F9; border-radius: 14px; padding: 14px; cursor: pointer; transition: 0.2s;" onmouseover="this.style.background='#F1F5F9'" onmouseout="this.style.background='#F8FAFC'" onclick="if(typeof openDrillDown === 'function') openDrillDown('${ev.id}', 'TERPAKAI')">
+                                <div style="flex: 1; background: #F8FAFC; border: 1px solid #F1F5F9; border-radius: 14px; padding: 14px; cursor: pointer; transition: 0.2s;" onmouseover="this.style.background='#F1F5F9'" onmouseout="this.style.background='#F8FAFC'" onclick="window.openDrillDown('${ev.id}', 'TERPAKAI')">
                                     <div style="font-size: 10px; font-weight: 800; color: #64748B; margin-bottom: 6px; text-transform: uppercase; display: flex; align-items: center; gap: 4px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="3"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg> PENGELUARAN</div>
                                     <div style="font-size: 15px; font-weight: 900; color: #0F172A; letter-spacing: -0.5px;">Rp ${fmtRp(realOutAmt)}</div>
                                 </div>
                             </div>
 
-                            <div style="background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%); border: 1px solid #BFDBFE; border-radius: 14px; padding: 16px; margin-bottom: 20px; cursor: pointer; position: relative; overflow: hidden;" onclick="if(typeof openDrillDown === 'function') openDrillDown('${ev.id}', 'SISA')">
+                            <div style="background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%); border: 1px solid #BFDBFE; border-radius: 14px; padding: 16px; margin-bottom: 20px; cursor: pointer; position: relative; overflow: hidden;" onclick="window.openDrillDown('${ev.id}', 'SISA')">
+
                                 <div style="position: absolute; right: -10px; top: -10px; opacity: 0.1; color: #2563EB;"><svg width="80" height="80" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/></svg></div>
                                 <div style="font-size: 10.5px; font-weight: 800; color: #1D4ED8; margin-bottom: 6px; text-transform: uppercase; position: relative; z-index: 2;">SISA KAS TERSEDIA</div>
                                 <div style="font-size: 20px; font-weight: 900; color: #1E3A8A; letter-spacing: -0.5px; margin-bottom: 4px; position: relative; z-index: 2;">Rp ${fmtRp(sisaKasTersedia)}</div>
@@ -5294,7 +5297,19 @@
                             // SURGICAL FIX: Pembekuan nilai kepatuhan linier asli tanpa inflasi Combo Masa Depan (Advance Payer Protection)
                             let currentBonusXp = anggotaUpdates[ag.id].hist_xp_bonus || 0;
                             let currentAdvanceXp = (ag.advance_count || 0) * 75;
-                            agUpdate.hist_kepatuhan_xp = (ag.xp_total || 0) - currentBonusXp - currentAdvanceXp;
+                            
+                            // [BLUEPRINT BULLETPROOF] Anti-Double Penalty: Netralisir denda masa lalu agar tidak berlipat ganda di tahun depan
+                            let unpaidCount = 0;
+                            let jY = parseInt(ag.join_year) || 2000;
+                            let jB = parseInt(ag.join_bln) || 1;
+                            let arsipMap = anggotaUpdates[ag.id].arsip_iuran_map || [];
+                            for (let y = jY; y < currY; y++) {
+                                let startM = (y === jY) ? jB : 1;
+                                for (let m = startM; m <= 12; m++) {
+                                    if (!arsipMap.includes(`${y}-${m}`)) unpaidCount++;
+                                }
+                            }
+                            agUpdate.hist_kepatuhan_xp = (ag.xp_total || 0) - currentBonusXp - currentAdvanceXp + (unpaidCount * 75);
 
                             // Injeksi Permanen Kapsul Waktu
                             agUpdate.hist_iuran_rp = anggotaUpdates[ag.id].hist_iuran_rp;
@@ -5708,7 +5723,7 @@
                         <button class="close-modal" style="top: 16px;" onclick="closeModal('mod-donasi-list')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
                         <h3 style="font-size: 18px; font-weight: 800; display:flex; align-items:center; gap:8px;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Klasemen Donasi</h3>
                     </div>
-                    <div id="leaderboard-list" style="padding: 20px; max-height: 65vh; overflow-y: auto;"></div>
+                    <div id="leaderboard-list" style="padding: 20px;"></div>
                 </div>
             </div>
 
@@ -5755,7 +5770,7 @@
                         <button class="close-modal" style="top: 16px;" onclick="closeModal('mod-drilldown')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
                         <h3 id="drill-title" style="font-size: 16px; font-weight: 900; text-transform: uppercase; color: var(--primary); padding-right: 24px; line-height: 1.4;">RINCIAN DATA</h3>
                     </div>
-                    <div id="drill-list" style="padding: 20px; max-height: 60vh; overflow-y: auto;"></div>
+                    <div id="drill-list" style="padding: 20px;"></div>
                 </div>
             </div>
 
@@ -6615,6 +6630,10 @@
                 
                 document.getElementById('drill-title').innerText = title;
                 document.getElementById('drill-list').innerHTML = html;
+                
+                let modElDrill = document.getElementById('mod-drilldown');
+                if (modElDrill) document.body.appendChild(modElDrill);
+
                 openModal('mod-drilldown');
             }
 
