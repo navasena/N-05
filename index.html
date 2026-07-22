@@ -423,7 +423,8 @@
             let isSuccess = /berhasil|sukses|diperbarui|disimpan|lunas|selesai/i.test(msg);
 
             // PRIORITY OVERRIDE LOCK: Veto Eksekutif (Pesan Error tidak boleh ditimpa pesan biasa)
-            if (_activeToastIsError && !isError) return; 
+            // SURGICAL FIX: Jika pesan baru adalah SUCCESS Mutlak, VETO harus digugurkan agar user tidak kebingungan!
+            if (_activeToastIsError && !isError && !isSuccess) return; 
             _activeToastIsError = isError;
 
             // UNICODE ANNIHILATOR: Hapus semua jenis emoji/simbol OS bawaan secara absolut
@@ -1099,22 +1100,30 @@
                 fomoContainer.innerHTML = '<div style="text-align:center; color:#9CA3AF; font-size:12px; padding:16px; border: 1.5px dashed var(--border); border-radius: 12px; margin-bottom: 24px;">Belum ada riwayat donasi</div>';
                 return;
             }
+
+            // [SURGICAL FIX]: Kalkulasi Akumulasi Total Donasi Global
+            let totalDonasiGlobal = 0;
+            donasiTrx.forEach(t => totalDonasiGlobal += (t.nom_final || t.nom_awal || 0));
+
             let sorted = [...donasiTrx].sort((a, b) => b.ts - a.ts);
             let top = sorted.slice(0, 3);
             let html = `
             <div class="fomo-container">
-                <div class="fomo-header">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Riwayat Donasi Terbaru
+                <div class="fomo-header" style="justify-content: space-between; align-items: center;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Donasi Terbaru
+                    </div>
+                    <div style="background: #D1FAE5; color: #059669; padding: 4px 8px; border-radius: 6px; font-size: 9.5px; font-weight: 900; letter-spacing: 0.5px; border: 1px solid #A7F3D0; box-shadow: 0 2px 4px rgba(16, 185, 129, 0.1);">
+                        TOTAL: RP ${new Intl.NumberFormat('id-ID').format(totalDonasiGlobal)}
+                    </div>
                 </div>
                 <div style="display:flex; flex-direction:column; gap:8px;">`;
+
             top.forEach(t => {
                 let nama = t.id_anggota ? (state.anggota.find(a => a.id === t.id_anggota)?.nama || 'Anonim') : (t.ket || 'Hamba Allah');
                 let nominal = new Intl.NumberFormat('id-ID').format(t.nom_final || t.nom_awal || 0);
                 html += `<div style="display:flex; justify-content:space-between; align-items:center; padding:10px; background:#F9FAFB; border:1px solid #E5E7EB; border-radius:8px;">
                                 <div style="display:flex; align-items:center; gap:10px;">
-                                    <div style="width:32px; height:32px; border-radius:50%; background:#D1FAE5; color:#065F46; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:12px; flex-shrink: 0;">
-                                        ${nama.charAt(0).toUpperCase()}
-                                    </div>
                                     <div style="min-width:0; flex:1;">
                                         <p style="margin:0; font-size:12px; font-weight:800; color:#1F2937; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${esc(nama)}</p>
                                         <p style="margin:0; font-size:9px; font-weight:700; color:#6B7280;">${t.tanggal || new Date(t.ts).toLocaleDateString('id-ID')}</p>
@@ -1139,22 +1148,28 @@
             let currY = new Date().getFullYear();
             
             state.dompet.forEach(d => dompetMap[d.id] = { in: 0, out: 0, pend: 0 });
+
             for (let i = 0; i < state.trx.length; i++) {
                 let t = state.trx[i];
                 if (t.is_deleted) continue;
                 let idD = t.id_dompet || 'DP-UTAMA';
                 if (!dompetMap[idD]) dompetMap[idD] = { in: 0, out: 0, pend: 0 };
                 
-                let isThisMonth = new Date(t.ts).getMonth() === currM && (t.year || new Date(t.ts).getFullYear()) === currY;
+                // [SURGICAL FIX]: PENEGAKAN AKUNTANSI BASIS KAS (CASH-BASIS ACCOUNTING)
+                // Mengabaikan t.year (Tahun Buku) untuk Analitik Pemasukan Bulan Berjalan, 
+                // mutlak menggunakan Timestamp Asli (t.ts) jatuhnya uang fisik ke dalam kas.
+                let isThisMonth = new Date(t.ts).getMonth() === currM && new Date(t.ts).getFullYear() === currY;
                 
                 if (t.tipe === 'masuk' || t.tipe === 'iuran') {
                     dompetMap[idD].in += t.nom_final;
                     if (isThisMonth && t.kat !== 'Saldo Awal' && t.kat !== 'Transfer Internal' && t.kat !== 'Sisa Uang Muka') tInAnalitik += t.nom_final;
+
                 } else if (t.tipe === 'keluar') {
                     if (t.status === 'pending') dompetMap[idD].pend += t.nom_awal;
                     else if (t.status === 'lunas') dompetMap[idD].out += t.nom_final;
-                    if (isThisMonth && t.status === 'lunas' && t.kat !== 'Saldo Awal' && t.kat !== 'Koreksi Saldo Awal (Akumulasi Pengeluaran Pindahan)' && t.kat !== 'Uang Muka Kegiatan' && t.kat !== 'Transfer Internal') tOutAnalitik += t.nom_final;
+                    if (isThisMonth && t.kat !== 'Saldo Awal' && t.kat !== 'Koreksi Saldo Awal (Akumulasi Pengeluaran Pindahan)' && t.kat !== 'Uang Muka Kegiatan' && t.kat !== 'Transfer Internal') tOutAnalitik += (t.status === 'pending' ? t.nom_awal : (t.status === 'talangan' ? 0 : t.nom_final));
                 }
+
             }
             let sUtama = 0;
             state.dompet.filter(d => d.status !== 'arsip').forEach(d => {
@@ -1228,6 +1243,25 @@
 
                     tickerEl.innerHTML = fusionHtml || '<span style="color: #94A3B8; font-weight: 800;">[BELUM ADA INFORMASI, DONASI ATAU MVP ANGGOTA NAVASENA]</span>';
                 }
+                
+                // [SURGICAL FIX]: CONSTANT SPEED MATRIX (Ticker Auto-Pilot)
+                // Memberi jeda 1 frame agar browser selesai merender teks ke layar sebelum diukur
+                requestAnimationFrame(() => {
+                    // Paksa reflow untuk mendapatkan ukuran piksel fisik mutlak
+                    void tickerEl.offsetWidth; 
+                    
+                    let distance = tickerEl.offsetWidth; 
+                    // Failsafe: Jarak minimal adalah 2x lebar layar untuk mencegah glitch visual
+                    let minDistance = (tickerEl.parentElement.offsetWidth || window.innerWidth) * 2;
+                    let finalDistance = Math.max(distance, minDistance);
+                    
+                    // Kecepatan konstan: 55 pixel per detik (Kecepatan baca ideal standar TV/Berita)
+                    let speedPxPerSec = 55; 
+                    let calculatedDuration = finalDistance / speedPxPerSec;
+                    
+                    // Hancurkan durasi CSS lama (20s) & Timpa dengan durasi presisi matematis
+                    tickerEl.style.animationDuration = calculatedDuration + 's';
+                });
             }
 
             window.renderFomoWidget(); // PEMANGGILAN AMAN
@@ -1287,7 +1321,8 @@
         };
 
         window.renderWargaProfile = function() {
-            if(!isKiosk) return; // Eksklusif Warga Mode
+            // SURGICAL FIX: Gatekeeper 'if(!isKiosk) return;' dimusnahkan.
+            // Rendering diserahkan pada Otorisasi RBAC masing-masing komponen di bawah.
             
             // 1. MADING TRANSPARANSI
             let madingEl = document.getElementById('warga-mading-ui');
@@ -1348,6 +1383,7 @@
             if (honEl && (!isKiosk || !isUserWarga)) {
                 honEl.innerHTML = '';
                 honEl.style.display = 'none';
+
             } else if (honEl && isKiosk && isUserWarga) {
                 let dLuar = {}; let dAnonim = 0;
                 let currY = new Date().getFullYear(); // YTD Filter Mutlak
@@ -1355,19 +1391,33 @@
                 
                 state.trx.forEach(t => {
                     let tYear = t.year || new Date(t.ts).getFullYear();
-                    // Akuntansi Mutlak: Hanya Masuk, Eksternal, Tahun Ini, Bukan Saldo/Koreksi
-                    if (!t.is_deleted && t.tipe === 'masuk' && !t.id_anggota && tYear === currY && t.kat !== 'Transfer Internal' && t.kat !== 'Sisa Uang Muka' && t.kat !== 'Saldo Awal' && !(t.kat||'').includes('Koreksi Saldo')) {
+                    // [SURGICAL FIX]: Whitelist Protocol (Murni Kategori Donasi) & Timestamp Capture
+                    if (!t.is_deleted && t.tipe === 'masuk' && !t.id_anggota && tYear === currY && t.kat && String(t.kat).toLowerCase().includes('donasi')) {
                         let nClean = (t.ket || '').replace(/^Donasi\s*(Umum)?\s*[:-]?\s*/i, '').split('-')[0].trim();
                         // Sanitasi nama absolut
                         nClean = nClean.replace(/[^a-zA-Z0-9\s]/g, '').trim();
                         if (!nClean) nClean = "Warga Umum";
                         
-                        if (blRegex.test(nClean)) dAnonim += t.nom_final;
-                        else dLuar[nClean] = (dLuar[nClean] || 0) + t.nom_final;
+                        if (blRegex.test(nClean)) {
+                            dAnonim += t.nom_final;
+                        } else {
+                            if (!dLuar[nClean]) dLuar[nClean] = { total: 0, earliest_ts: t.ts };
+                            dLuar[nClean].total += t.nom_final;
+                            if (t.ts < dLuar[nClean].earliest_ts) dLuar[nClean].earliest_ts = t.ts;
+                        }
                     }
                 });
                 
-                let arrHon = Object.keys(dLuar).map(k => ({nama: k, total: dLuar[k]})).sort((a,b) => b.total - a.total).slice(0,3);
+                // [SURGICAL FIX]: Double-Layer Sorting (Tie-Breaker Nominal & Waktu)
+                let arrHon = Object.keys(dLuar).map(k => ({
+                    nama: k, 
+                    total: dLuar[k].total, 
+                    earliest_ts: dLuar[k].earliest_ts
+                })).sort((a, b) => {
+                    if (b.total !== a.total) return b.total - a.total; // Hukum 1: Prioritas Nominal Uang
+                    return a.earliest_ts - b.earliest_ts; // Hukum 2: Prioritas Waktu Terawal
+                }).slice(0, 3);
+
                 
                 if (arrHon.length > 0) {
                     // Padding Matrix: Memastikan selalu ada 3 kartu agar mesin animasi tidak crash
@@ -1718,16 +1768,22 @@
             let listAnggota = generatePremiumListHTML(arrAnggota);
             let listWarga = generatePremiumListHTML(arrUmum);
 
+            // [SURGICAL FIX]: Dynamic Role-Based Tab Routing & Ordering
+            let isUserWargaRole = localStorage.getItem('nav_role') === 'warga';
+            
+            let btnAnggotaHtml = `<button class="seg-btn ${isUserWargaRole ? '' : 'active'}" id="tab-donasi-anggota" onclick="document.getElementById('view-donasi-anggota').style.display='block'; document.getElementById('view-donasi-warga').style.display='none'; this.classList.add('active'); document.getElementById('tab-donasi-warga').classList.remove('active');">Donatur Anggota</button>`;
+            
+            let btnWargaHtml = `<button class="seg-btn ${isUserWargaRole ? 'active' : ''}" id="tab-donasi-warga" onclick="document.getElementById('view-donasi-warga').style.display='block'; document.getElementById('view-donasi-anggota').style.display='none'; this.classList.add('active'); document.getElementById('tab-donasi-anggota').classList.remove('active');">Donatur Warga</button>`;
+
             let html = `
                 <div class="seg-control no-select" style="margin-bottom: 24px; position: sticky; top: -20px; z-index: 5; background: #F1F5F9; border: 1px solid #E2E8F0; padding: 4px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
-                    <button class="seg-btn active" id="tab-donasi-anggota" onclick="document.getElementById('view-donasi-anggota').style.display='block'; document.getElementById('view-donasi-warga').style.display='none'; this.classList.add('active'); document.getElementById('tab-donasi-warga').classList.remove('active');">Donatur Anggota</button>
-                    <button class="seg-btn" id="tab-donasi-warga" onclick="document.getElementById('view-donasi-warga').style.display='block'; document.getElementById('view-donasi-anggota').style.display='none'; this.classList.add('active'); document.getElementById('tab-donasi-anggota').classList.remove('active');">Donatur Warga</button>
+                    ${isUserWargaRole ? btnWargaHtml + btnAnggotaHtml : btnAnggotaHtml + btnWargaHtml}
                 </div>
                 
-                <div id="view-donasi-anggota" style="display: block;">
+                <div id="view-donasi-anggota" style="display: ${isUserWargaRole ? 'none' : 'block'};">
                     ${listAnggota}
                 </div>
-                <div id="view-donasi-warga" style="display: none;">
+                <div id="view-donasi-warga" style="display: ${isUserWargaRole ? 'block' : 'none'};">
                     ${listWarga}
                 </div>
             `;
@@ -2081,7 +2137,7 @@
                     let ag = state.anggota.find(a => a.id === t.id_anggota);
                     let namaPJ = ag ? esc(ag.nama).toUpperCase() : 'ANONIM';
                     if (t.status === 'lunas') {
-                        identitasTeks = String(t.ket || '').includes('[TALANGAN') ? `Penyelesaian Talangan: ${namaPJ}` : `Uang Muka Selesai: ${namaPJ}`;
+                        identitasTeks = String(t.ket || '').includes('[TALANGAN') ? `Penyelesaian Talangan: ${namaPJ}` : (String(t.ket || '').includes('Transfer ke PJ:') ? `Pencairan Dana PJ: ${namaPJ}` : `Uang Muka Selesai: ${namaPJ}`);
                     } else if (t.status === 'talangan') {
                         identitasTeks = `Ditalangi oleh: ${namaPJ}`;
                     } else {
@@ -2259,10 +2315,10 @@
                         return showToast("TOLAK (LIMBO PROTECTION): Dompet kas dari mutasi ini sudah ditutup/diarsipkan. Data tidak dapat dimanipulasi!");
                     }
                     
-                   // Proteksi 2: Accounting Deadlock (Double-Entry Shield Mutlak)
-                    let isTerikat = (tCek.kat === 'Transfer Internal' || tCek.kat === 'Uang Muka Kegiatan' || tCek.kat === 'Sisa Uang Muka');
+                   // Proteksi 2: Accounting Deadlock (Double-Entry & Saldo Awal Shield Mutlak)
+                    let isTerikat = (tCek.kat === 'Transfer Internal' || tCek.kat === 'Uang Muka Kegiatan' || tCek.kat === 'Sisa Uang Muka' || tCek.kat === 'Saldo Awal');
                     if (isTerikat) {
-                        return showToast("TOLAK: Mutasi ini adalah sistem Ganda (Double-Entry) Kepanitiaan. Dilarang dihapus manual agar kas tidak selisih/bocor!");
+                        return showToast("TOLAK: Mutasi ini adalah sistem Terikat (Double-Entry / Saldo Awal). Dilarang dihapus manual agar integritas kas tidak hancur!");
                     }
                     
                     // SURGICAL FIX: IMMUTABLE ARCHIVE SHIELD (Proteksi Sejarah LPJ)
@@ -2599,6 +2655,8 @@
                         trxThisMonth.sort((a,b) => a.ts - b.ts);
                         mvpId = trxThisMonth[0].id_anggota;
                     }
+                    
+                    let jArrList = getSetting('jabatan_list', 'Ketum NAVASENA, Sekretaris Jenderal, Bendahara Umum, Koordinator Humas, Admin Medsos').split(',').map(s=>s.replace(/\s+/g, ' ').trim().toLowerCase());
 
                     filteredAnggota.forEach(ag => {
                         const bNames = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Ags','Sep','Okt','Nov','Des'];
@@ -2617,8 +2675,13 @@
                             });
                         }
 
+                        let isCustom = ag.label && !jArrList.includes(ag.label.replace(/\s+/g, ' ').trim().toLowerCase());
+                        let badgeStyle = isCustom
+                            ? 'background: linear-gradient(135deg, #DC2626 0%, #991B1B 100%); color: #FFFFFF; border: 1px solid rgba(239, 68, 68, 0.5); box-shadow: 0 4px 10px rgba(220, 38, 38, 0.3);'
+                            : 'background: linear-gradient(135deg, #0F172A 0%, #1E3A8A 100%); color: #38BDF8; border: 1px solid rgba(56, 189, 248, 0.4); box-shadow: 0 4px 10px rgba(15, 23, 42, 0.2);';
+
                         let mvpTag = (mvpId === ag.id) ? `<span style="font-size: 8.5px; font-weight: 900; letter-spacing: 0.5px; background: linear-gradient(135deg, #FDE68A 0%, #F59E0B 100%); color: white; padding: 4px 8px; border-radius: 8px; margin-left: 6px; box-shadow: 0 4px 10px rgba(245, 158, 11, 0.3);">MVP</span>` : '';
-                        let badgeLabel = ag.label ? `<span style="font-size: 8.5px; font-weight: 900; letter-spacing: 1px; background: linear-gradient(135deg, #0F172A 0%, #1E3A8A 100%); color: #38BDF8; border: 1px solid rgba(56, 189, 248, 0.4); padding: 4px 10px; border-radius: 12px; box-shadow: 0 4px 10px rgba(15, 23, 42, 0.2); display: inline-flex; align-items: center;">${esc(ag.label).toUpperCase()}</span>` : '';
+                        let badgeLabel = ag.label ? `<span style="font-size: 8.5px; font-weight: 900; letter-spacing: 1px; ${badgeStyle} padding: 4px 10px; border-radius: 12px; display: inline-flex; align-items: center;">${esc(ag.label).toUpperCase()}</span>` : '';
                         let isBdayToday = ag.tgl_lahir && ag.tgl_lahir.endsWith(dMMDD);
 
                         let bdayIcon = isBdayToday ? `<span style="font-size: 16px; margin-left: 6px;" title="Ulang Tahun Hari Ini!">🎂</span>` : '';
@@ -3254,8 +3317,9 @@
         </div>
 
         <!-- CUSTOM INPUT PROMPT MODAL -->
-        <div id="mod-input-prompt" class="modal" style="z-index: 4060;">
+        <div id="mod-input-prompt" class="modal" style="z-index: 100005;">
             <div class="modal-box" style="text-align: center; max-width: 320px; padding: 32px 24px;">
+
                 <div style="margin: 0 auto 20px auto; width: 52px; height: 52px; background: var(--primary-light); color: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(30, 58, 138, 0.15);">
                     <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
                 </div>
@@ -3822,8 +3886,8 @@
                     let isActive = opt.value === selectedVal;
                     let cClass = isActive ? 'option-item active no-select' : 'option-item no-select';
                     let radioSvg = isActive ? `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2.5"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4" fill="var(--primary)"/></svg>` : `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="2.5"><circle cx="12" cy="12" r="9"/></svg>`;
-                    
-                    html += `<div class="${cClass}" style="display:flex; justify-content:space-between; align-items:center;" onclick="executeSelect('${opt.value}')">
+                    let safeVal = String(opt.value).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+                    html += `<div class="${cClass}" style="display:flex; justify-content:space-between; align-items:center;" onclick="executeSelect('${safeVal}')">
                         <span>${esc(opt.label)}</span>
                         ${radioSvg}
                     </div>`;
@@ -4079,9 +4143,14 @@
                 let tabBtn = document.getElementById('tab-list-anggota');
                 if (tabBtn) tabBtn.innerText = `Data Anggota (${state.anggota.length})`;
 
+                let jArrList = getSetting('jabatan_list', 'Ketum NAVASENA, Sekretaris Jenderal, Bendahara Umum, Koordinator Humas, Admin Medsos').split(',').map(s=>s.replace(/\s+/g, ' ').trim().toLowerCase());
                 let h = '';
                 state.anggota.forEach(a => {
-                    let badgeLabel = a.label ? `<span style="font-size: 8.5px; font-weight: 900; letter-spacing: 0.8px; background: linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%); color: #B45309; border: 1px solid #FDE68A; padding: 4px 10px; border-radius: 12px; margin-left: 10px; box-shadow: 0 2px 4px rgba(180, 83, 9, 0.08); display: inline-flex; align-items: center; transform: translateY(-1px);">${esc(a.label).toUpperCase()}</span>` : '';
+                    let isCustom = a.label && !jArrList.includes(a.label.replace(/\s+/g, ' ').trim().toLowerCase());
+                    let badgeStyle = isCustom 
+                        ? 'background: linear-gradient(135deg, #DC2626 0%, #991B1B 100%); color: #FFFFFF; border: 1px solid rgba(239, 68, 68, 0.5); box-shadow: 0 4px 10px rgba(220, 38, 38, 0.2);'
+                        : 'background: linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%); color: #B45309; border: 1px solid #FDE68A; box-shadow: 0 2px 4px rgba(180, 83, 9, 0.08);';
+                    let badgeLabel = a.label ? `<span style="font-size: 8.5px; font-weight: 900; letter-spacing: 0.8px; ${badgeStyle} padding: 4px 10px; border-radius: 12px; margin-left: 10px; display: inline-flex; align-items: center; transform: translateY(-1px);">${esc(a.label).toUpperCase()}</span>` : '';
                     let rClass = a.rank_class || 'r-warrior'; 
                     
                     let tglLahirTxt = '-'; let isTglEmpty = true;
@@ -4161,6 +4230,7 @@
             async function saveEvent() {
                 if(isKiosk) return showToast("DITOLAK: Sistem Terkunci dalam Mode Audit.");
                 if(isProcessingMaster) return;
+                
                 let n = document.getElementById('evt-nama').value.trim();
                 let t = getRawRp(document.getElementById('evt-target').value);
                 if(!n) return showToast("Gagal: Nama Program harus diisi.");
@@ -4171,15 +4241,19 @@
                 if (dVal === 'BUAT_BARU') {
                     let dBaruNama = document.getElementById('evt-new-dompet-nama').value.trim();
                     if(!dBaruNama) return showToast("Ketik nama dompet baru terlebih dahulu!");
+                    
+                    isProcessingMaster = true; // KUNCI MUTLAK SEBELUM PROSES ASYNC
                     idDompetMapped = genID('DP');
                     let newDompet = { id: idDompetMapped, nama: dBaruNama, status: 'aktif' };
                     await saveStore('dompet', newDompet);
                     state.dompet.push(newDompet);
                 } else if (!dVal) {
                     idDompetMapped = 'DP-UTAMA';
+                    isProcessingMaster = true; // KUNCI MUTLAK UNTUK JALUR NORMAL
+                } else {
+                    isProcessingMaster = true; // KUNCI MUTLAK UNTUK JALUR NORMAL
                 }
                 
-                isProcessingMaster = true;
                 let ev = { id: genID('EV'), nama: n, target: t, status: 'aktif', id_dompet_default: idDompetMapped };
 
                 try {
@@ -4219,12 +4293,20 @@
 
                 if (activeEvents.length > 0) {
                     activeEvents.forEach(ev => {
-                        let inAmt = 0, realOutAmt = 0;
+
+                        let inAmt = 0, realOutAmt = 0, murniDonasiAmt = 0;
                         (eventTrxMap[ev.id] || []).forEach(t => {
                             if (t.kat === 'Transfer Internal' || t.kat === 'Uang Muka Kegiatan' || t.kat === 'Sisa Uang Muka') return;
-                            if (t.tipe === 'masuk' || t.tipe === 'iuran') inAmt += t.nom_final;
+                            if (t.tipe === 'masuk' || t.tipe === 'iuran') {
+                                inAmt += t.nom_final;
+                                // [SURGICAL FIX]: Tangkap spesifik mutasi murni berstatus Donasi
+                                if (t.kat && String(t.kat).toLowerCase().includes('donasi')) {
+                                    murniDonasiAmt += t.nom_final;
+                                }
+                            }
                             else if (t.tipe === 'keluar') realOutAmt += (t.status === 'pending' || t.status === 'talangan' ? t.nom_awal : t.nom_final);
                         });
+
 
                         let allPjDompets = state.dompet.filter(d => d.id_event === ev.id && d.is_pj && d.status === 'aktif');
                         let pjControlHtml = '';
@@ -4290,15 +4372,19 @@
                             </div>` : '<div style="margin-bottom: 20px; border-bottom: 1.5px dashed #E2E8F0;"></div>'}
 
                             <div style="display: flex; gap: 12px; margin-bottom: 16px;">
-                                <div style="flex: 1; background: #F8FAFC; border: 1px solid #F1F5F9; border-radius: 14px; padding: 14px; cursor: pointer; transition: 0.2s;" onmouseover="this.style.background='#F1F5F9'" onmouseout="this.style.background='#F8FAFC'" onclick="window.openDrillDown('${ev.id}', 'TERKUMPUL')">
-                                    <div style="font-size: 10px; font-weight: 800; color: #64748B; margin-bottom: 6px; text-transform: uppercase; display: flex; align-items: center; gap: 4px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="3"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg> DANA MASUK</div>
-                                    <div style="font-size: 15px; font-weight: 900; color: #0F172A; letter-spacing: -0.5px;">Rp ${fmtRp(inAmt)}</div>
+                                <div style="flex: 1; background: #F8FAFC; border: 1px solid #F1F5F9; border-radius: 14px; padding: 14px; cursor: pointer; transition: 0.2s; display: flex; flex-direction: column; justify-content: space-between;" onmouseover="this.style.background='#F1F5F9'" onmouseout="this.style.background='#F8FAFC'" onclick="window.openDrillDown('${ev.id}', 'TERKUMPUL')">
+                                    <div>
+                                        <div style="font-size: 10px; font-weight: 800; color: #64748B; margin-bottom: 6px; text-transform: uppercase; display: flex; align-items: center; gap: 4px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="3"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg> DANA MASUK</div>
+                                        <div style="font-size: 15px; font-weight: 900; color: #0F172A; letter-spacing: -0.5px; margin-bottom: 6px;">Rp ${fmtRp(inAmt)}</div>
+                                    </div>
+                                    <div style="font-size: 9px; font-weight: 800; color: #059669; background: #D1FAE5; padding: 4px 6px; border-radius: 6px; display: inline-block; align-self: flex-start; border: 1px solid #A7F3D0; box-shadow: 0 2px 4px rgba(16, 185, 129, 0.05);">Total Donasi: Rp ${fmtRp(murniDonasiAmt)}</div>
                                 </div>
-                                <div style="flex: 1; background: #F8FAFC; border: 1px solid #F1F5F9; border-radius: 14px; padding: 14px; cursor: pointer; transition: 0.2s;" onmouseover="this.style.background='#F1F5F9'" onmouseout="this.style.background='#F8FAFC'" onclick="window.openDrillDown('${ev.id}', 'TERPAKAI')">
+                                <div style="flex: 1; background: #F8FAFC; border: 1px solid #F1F5F9; border-radius: 14px; padding: 14px; cursor: pointer; transition: 0.2s; display: flex; flex-direction: column;" onmouseover="this.style.background='#F1F5F9'" onmouseout="this.style.background='#F8FAFC'" onclick="window.openDrillDown('${ev.id}', 'TERPAKAI')">
                                     <div style="font-size: 10px; font-weight: 800; color: #64748B; margin-bottom: 6px; text-transform: uppercase; display: flex; align-items: center; gap: 4px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="3"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg> PENGELUARAN</div>
                                     <div style="font-size: 15px; font-weight: 900; color: #0F172A; letter-spacing: -0.5px;">Rp ${fmtRp(realOutAmt)}</div>
                                 </div>
                             </div>
+
 
                             <div style="background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%); border: 1px solid #BFDBFE; border-radius: 14px; padding: 16px; margin-bottom: 20px; cursor: pointer; position: relative; overflow: hidden;" onclick="window.openDrillDown('${ev.id}', 'SISA')">
 
@@ -4339,13 +4425,24 @@
 
                 if (archivedEvents.length > 0) {
                     archivedEvents.forEach(ev => {
-                        let inAmt = 0, outAmt = 0;
+                        let inAmt = 0, outAmt = 0, murniDonasiAmt = 0;
                         let trxList = (eventTrxMap[ev.id] || []).filter(t => t.status === 'lunas');
                         let historyHtml = '';
                         if (trxList.length === 0) {
                             historyHtml = '<div style="font-size:11px; color:var(--text-muted); text-align:center; padding:10px 0;">Tidak ada riwayat mutasi.</div>';
                         } else {
-                            trxList.forEach(t => { if(t.tipe === 'masuk') inAmt += t.nom_final; else outAmt += t.nom_final; });
+                            trxList.forEach(t => { 
+                                if(t.tipe === 'masuk') {
+                                    inAmt += t.nom_final; 
+                                    // [SURGICAL FIX]: Ekstraksi donasi murni dari Arsip Kapsul Waktu
+                                    if (t.kat && String(t.kat).toLowerCase().includes('donasi')) {
+                                        murniDonasiAmt += t.nom_final;
+                                    }
+                                } else {
+                                    outAmt += t.nom_final; 
+                                }
+                            });
+
                             let displayList = trxList.slice(0, 50);
                             displayList.forEach(t => {
                                 let dt = new Date(t.ts);
@@ -4375,11 +4472,17 @@
                                     </div>
                                     <span style="font-size: 9px; font-weight: 800; color: #92400E; background: var(--warning-light); padding: 4px 8px; border-radius: 6px;">ARSIP</span>
                                 </div>
-                                <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
                                     <span style="font-size: 11px; color: var(--text-muted); font-weight: 700;">Total Pemasukan</span>
                                     <span style="font-size: 13px; font-weight: 800; color: var(--text-main);">Rp ${fmtRp(inAmt)}</span>
                                 </div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                    <span style="font-size: 9.5px; color: #059669; font-weight: 800; background: #D1FAE5; padding: 2px 6px; border-radius: 4px; border: 1px solid #A7F3D0;">└ Murni Donasi</span>
+                                    <span style="font-size: 11px; font-weight: 800; color: #059669;">Rp ${fmtRp(murniDonasiAmt)}</span>
+                                </div>
                                 <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+
                                     <span style="font-size: 11px; color: var(--text-muted); font-weight: 700;">Total Pengeluaran</span>
                                     <span style="font-size: 13px; font-weight: 800; color: var(--text-main);">Rp ${fmtRp(outAmt)}</span>
                                 </div>
@@ -4601,8 +4704,12 @@
 
             async function saveDompetBaru() {
                 if(isKiosk) return showToast("DITOLAK: Mode Audit Aktif.");
+                if(window.isProcessingMaster) return; // PROTEKSI RACE CONDITION MUTLAK
+                
                 let nama = document.getElementById('inp-new-dompet').value.trim();
                 if(!nama) return showToast("Gagal: Nama dompet tidak boleh kosong!");
+                
+                window.isProcessingMaster = true; // KUNCI THREAD
                 let newD = { id: genID('DP'), nama: nama, status: 'aktif' };
                 try {
                     await saveStore('dompet', newD);
@@ -4611,7 +4718,11 @@
                     renderDompetUI();
                     showToast("Dompet kas baru siap digunakan.");
                     if(currView==='home') updateDashboard();
-                } catch(e) { showToast("Kesalahan sistem saat menyimpan dompet."); }
+                } catch(e) { 
+                    showToast("Kesalahan sistem saat menyimpan dompet."); 
+                } finally {
+                    window.isProcessingMaster = false; // BUKA KUNCI
+                }
             }
 
             function hapusDompet(id) {
@@ -4679,6 +4790,18 @@
                 if(idx > -1) {
                     let targetTrx = state.trx[idx];
                     
+                    // SURGICAL FIX: PROTEKSI LIMBO & ARCHIVE SHIELD (Mencegah Zombie Data)
+                    let dCek = state.dompet.find(d => d.id === (targetTrx.id_dompet || 'DP-UTAMA'));
+                    if (dCek && dCek.status === 'arsip') {
+                        return showToast("TOLAK (LIMBO PROTECTION): Dompet kas dari mutasi ini sudah diarsipkan. Pemulihan diblokir!");
+                    }
+                    if (targetTrx.id_event) {
+                        let evCek = state.event.find(e => e.id === targetTrx.id_event);
+                        if (evCek && evCek.status === 'arsip') {
+                            return showToast("TOLAK: Mutasi terikat pada Program Acara yang sudah di-LPJ-kan. Sejarah tidak boleh dirusak!");
+                        }
+                    }
+
                     // PROTEKSI ANTI-DEFISIT SAAT PEMULIHAN PENGELUARAN
                     if (targetTrx.tipe === 'keluar' && targetTrx.status !== 'talangan') {
                         let dIn = 0, dOut = 0, dPend = 0;
@@ -5325,13 +5448,33 @@
                             else if (top3[2] === ag.id && ag.xp_total > 0) agUpdate.badges.push(`🥉 Elite ${currY-1}`);
                             
                             // SURGICAL FIX: Pembekuan nilai kepatuhan linier asli tanpa inflasi Combo Masa Depan (Advance Payer Protection)
-                            let currentBonusXp = anggotaUpdates[ag.id].hist_xp_bonus || 0;
                             let currentAdvanceXp = (ag.advance_count || 0) * 75;
                             
-                            // [BLUEPRINT BULLETPROOF] Anti-Double Penalty: Netralisir denda masa lalu agar tidak berlipat ganda di tahun depan
-                            let unpaidCount = 0;
                             let jY = parseInt(ag.join_year) || 2000;
                             let jB = parseInt(ag.join_bln) || 1;
+                            
+                            // Ekstraksi Presisi Komponen Donasi XP (Mencegah Double Donasi XP Leak & Double Penalty)
+                            let tempRawDonasiXp = ag.hist_xp_bonus || 0;
+                            let tempDonasiMap = {};
+                            state.trx.forEach(t => {
+                                if (t.tipe === 'masuk' && t.id_anggota === ag.id && !t.is_deleted && t.kat !== 'Transfer Internal' && t.kat !== 'Saldo Awal' && !(t.kat||'').includes('Koreksi Saldo')) {
+                                    let tY = t.year || new Date(t.ts).getFullYear();
+                                    let tM = t.bln || (new Date(t.ts).getMonth() + 1);
+                                    tempDonasiMap[`${tY}-${tM}`] = (tempDonasiMap[`${tY}-${tM}`] || 0) + t.nom_final;
+                                }
+                            });
+                            for (let y = jY; y <= currY; y++) {
+                                let yearlyDonasi = 0;
+                                for (let m = 1; m <= 12; m++) {
+                                    let d = tempDonasiMap[`${y}-${m}`] || 0;
+                                    if (d > 0) yearlyDonasi += Math.floor(d / 10000) * 10;
+                                }
+                                tempRawDonasiXp += Math.min(yearlyDonasi, 500);
+                            }
+                            let effectiveBonusXp = ag.has_arrears ? Math.max(0, tempRawDonasiXp - 100) : tempRawDonasiXp;
+                            
+                            // [BLUEPRINT BULLETPROOF] Anti-Double Penalty & Donasi Leak: Netralisir denda masa lalu & hapus bonus berjalan
+                            let unpaidCount = 0;
                             let arsipMap = anggotaUpdates[ag.id].arsip_iuran_map || [];
                             for (let y = jY; y < currY; y++) {
                                 let startM = (y === jY) ? jB : 1;
@@ -5339,7 +5482,7 @@
                                     if (!arsipMap.includes(`${y}-${m}`)) unpaidCount++;
                                 }
                             }
-                            agUpdate.hist_kepatuhan_xp = (ag.xp_total || 0) - currentBonusXp - currentAdvanceXp + (unpaidCount * 75);
+                            agUpdate.hist_kepatuhan_xp = (ag.xp_total || 0) - effectiveBonusXp - currentAdvanceXp + (unpaidCount * 75);
 
                             // Injeksi Permanen Kapsul Waktu
                             agUpdate.hist_iuran_rp = anggotaUpdates[ag.id].hist_iuran_rp;
@@ -5794,7 +5937,7 @@
                 <div class="modal-box" style="background: var(--bg); padding: 0;">
                     <div style="background: var(--surface); padding: 20px; position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--border); border-radius: 24px 24px 0 0;">
                         <button class="close-modal" style="top: 16px;" onclick="closeModal('mod-donasi-list')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-                        <h3 style="font-size: 18px; font-weight: 800; display:flex; align-items:center; gap:8px;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Klasemen Donasi</h3>
+                        <h3 style="font-size: 18px; font-weight: 800; display:flex; align-items:center; gap:8px;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Daftar Donasi</h3>
                     </div>
                     <div id="leaderboard-list" style="padding: 20px;"></div>
                 </div>
@@ -6549,24 +6692,14 @@
                         dUpdate = {...state.dompet[idxD], status: 'arsip'};
                     }
                     
-                    // SURGICAL FIX: Isolasi Dompet Mutlak untuk memburu dan menyelesaikan nota uang muka awal PJ bersangkutan (Anti-Double Expense Cross-Wallet)
-                    let parentPendingTrxs = state.trx.filter(t => !t.is_deleted && t.id_event === idEvent && t.id_dompet === idDompet && t.status === 'pending');
-
                     // JIT DB CONNECTION HEALER: Membangkitkan memori IndexedDB yang ditidurkan OS
                     try { idb.transaction(['trx', 'dompet'], 'readonly'); } catch(err) { await initDB(); }
 
                     // EKSEKUSI ATOMIK MUTLAK (Anti-Corruption)
-                    let updatedParentTrxs = [];
                     await new Promise((resolve, reject) => {
                         let tx = idb.transaction(['trx', 'dompet'], 'readwrite');
                         let storeTrx = tx.objectStore('trx');
                         
-                        parentPendingTrxs.forEach(tLama => {
-                            let tClone = { ...tLama, status: 'lunas', nom_final: 0, ket: tLama.ket + ' [VOID: Diganti Nota Aktual LPJ]' };
-                            updatedParentTrxs.push(tClone);
-                            storeTrx.put(tClone);
-                        });         
-               
                         trxToSave.forEach(t => storeTrx.put(t));
                         if (dUpdate) tx.objectStore('dompet').put(dUpdate);
                         tx.oncomplete = resolve;
@@ -6574,10 +6707,6 @@
                     });
                     
                     localStorage.setItem('nav_unsynced', 'true');
-                    updatedParentTrxs.forEach(tBaru => {
-                        let idxMem = state.trx.findIndex(t => t.id === tBaru.id);
-                        if (idxMem > -1) state.trx[idxMem] = tBaru;
-                    });
                     trxToSave.forEach(t => state.trx.unshift(t));
                     if (dUpdate) state.dompet[idxD] = dUpdate;
                     
@@ -6905,6 +7034,13 @@
                     if (!isSilent) showToast("❌ Gagal sinkronisasi: Periksa internet Anda.");
                     return false;
                 }
+                
+                // PROTEKSI RACE CONDITION MUTLAK: Cegah Sync saat IDB sedang Menulis Data!
+                if (isProcessingTransaction || isProcessingMaster) {
+                    if (!isSilent) showToast("⚠️ Harap tunggu, sistem sedang memproses data lokal...");
+                    return false;
+                }
+                
                 if (window._isSyncingData) return false; 
                 window._isSyncingData = true;
 
@@ -7328,7 +7464,7 @@
             }
 
             function getBirthdayMessage(member, isDefisit, arrearsText, nomText) {
-                let nama = esc(member.nama).split(' ')[0]; 
+                let nama = member.nama.split(' ')[0]; 
                 let umur = new Date().getFullYear() - new Date(member.tgl_lahir).getFullYear();
                 let idNum = parseInt(member.id.replace(/\D/g, ''), 10) || 0;
                 let idx = (new Date().getFullYear() + idNum) % 12;
@@ -7387,20 +7523,20 @@
                             txt += `🌟 *[KLASEMEN APRESIASI KAS - TERIMA KASIH!]* 🌟\n`;
                             tertibList.forEach((t, i) => {
                                 let msg = getBirthdayMessage(t.member, false, '', '');
-                                txt += `👤 *${i+1}. ${esc(t.member.nama)}*\n💬 _"${msg}"_\n\n`;
+                                txt += `👤 *${i+1}. ${t.member.nama}*\n💬 _"${msg}"_\n\n`;
                             });
                         }
                         if (nunggakList.length > 0) {
                             txt += `⚠️ *[CATATAN KEDISIPLINAN ORGANISASI]* ⚠️\n`;
                             nunggakList.forEach((t, i) => {
                                 let msg = getBirthdayMessage(t.member, true, t.data.text, fmtRp(t.data.nominal));
-                                txt += `👤 *${i+1}. ${esc(t.member.nama)}*\n💬 _"${msg}"_\n\n`;
+                                txt += `👤 *${i+1}. ${t.member.nama}*\n💬 _"${msg}"_\n\n`;
                             });
                         }
                     } else {
                         let t = targets[0]; let ar = getArrearsTextData(t.id);
                         let msg = getBirthdayMessage(t, ar.count > 0, ar.text, fmtRp(ar.nominal));
-                        txt += `👤 *${esc(t.nama)}*\n💬 _"${msg}"_\n\n`;
+                        txt += `👤 *${t.nama}*\n💬 _"${msg}"_\n\n`;
                     }
 
                     txt += `📌 _Pesan ini di-generate otomatis oleh Sistem Portal NAVASENA._\n_Mari bersama-sama membangun Karang Taruna yang transparan dan mandiri!_`;
@@ -7451,7 +7587,7 @@
                 let isLintasTahun = ar.text.includes("'");
                 let headerBuku = isLintasTahun ? "periode berjalan" : `Tahun Buku ${new Date().getFullYear()}`;
 
-                let waText = `*TAGIHAN KAS NAVASENA*\n──────────────────\nAssalamualaikum Sdr/i *${esc(data.member.nama).split(' ')[0]}*,\nSemoga selalu dalam keadaan sehat dan lancar aktivitasnya. ✨\n\nBerikut kami informasikan rincian tunggakan iuran kas untuk *${headerBuku}* yang saat ini tercatat belum diselesaikan:\n\nRincian Tunggakan:\n• Periode : *${ar.text}* (${ar.count} Bulan)\n• Tarif : Rp ${fmtRp(parseInt(getSetting('iuran_nom', 10000), 10) || 0)} / bulan\n\nTOTAL TAGIHAN : *Rp ${fmtRp(ar.nominal)}*\n\nJika Anda sudah melakukan pembayaran, mohon abaikan pesan ini.\n\n*Besok, petugas kami berencana mampir ke rumah Anda untuk mengambil tunggakan iuran tersebut. Apabila Anda berhalangan atau sedang tidak berada di rumah, mohon bantuannya untuk menitipkan pembayaran tersebut kepada penghuni rumah lainnya.*\n\nTerima kasih banyak atas kemudahan dan kerja samanya. 🙏\n\n— Pesan otomatis Sistem Portal NAVASENA`;
+                let waText = `*TAGIHAN KAS NAVASENA*\n──────────────────\nAssalamualaikum Sdr/i *${data.member.nama.split(' ')[0]}*,\nSemoga selalu dalam keadaan sehat dan lancar aktivitasnya. ✨\n\nBerikut kami informasikan rincian tunggakan iuran kas untuk *${headerBuku}* yang saat ini tercatat belum diselesaikan:\n\nRincian Tunggakan:\n• Periode : *${ar.text}* (${ar.count} Bulan)\n• Tarif : Rp ${fmtRp(parseInt(getSetting('iuran_nom', 10000), 10) || 0)} / bulan\n\nTOTAL TAGIHAN : *Rp ${fmtRp(ar.nominal)}*\n\nJika Anda sudah melakukan pembayaran, mohon abaikan pesan ini.\n\n*Besok, petugas kami berencana mampir ke rumah Anda untuk mengambil tunggakan iuran tersebut. Apabila Anda berhalangan atau sedang tidak berada di rumah, mohon bantuannya untuk menitipkan pembayaran tersebut kepada penghuni rumah lainnya.*\n\nTerima kasih banyak atas kemudahan dan kerja samanya. 🙏\n\n— Pesan otomatis Sistem Portal NAVASENA`;
 
                 let waEncoded = encodeURIComponent(waText).replace(/'/g, "%27");
                 let url = `https://wa.me/${noWa}?text=${waEncoded}`;
@@ -7564,7 +7700,7 @@
                             setTimeout(() => slides[cIdx].style.opacity = '1', 50);
                         }, 800); 
                     }, 10000); 
-                }, 30000); 
+                }, 60000); 
             }
 
             let scrollTimeout;
