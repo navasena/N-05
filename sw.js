@@ -4,7 +4,7 @@
  * Protection: Opaque Quota Shield, Thread Lockdown GC, Fault-Tolerant Pre-Caching
  */
 
-const APP_VERSION = '2.0'; // Versi final, akan memicu pemusnahan memori lama
+const APP_VERSION = '2.1'; // Versi final, akan memicu pemusnahan memori lama
 const CACHE_PREFIX = 'portal-navasena-';
 const CACHE_STATIC = CACHE_PREFIX + 'static-v' + APP_VERSION;
 const CACHE_DYNAMIC = CACHE_PREFIX + 'dynamic-v' + APP_VERSION;
@@ -147,18 +147,18 @@ self.addEventListener('fetch', event => {
       return networkRes;
     }).catch(() => null); // Jika offline, fetch gagal dengan tenang tanpa crash
 
-    // Thread Lockdown Mutlak: Wajib dipanggil secara sinkron SEBELUM event loop listener berakhir
-    event.respondWith((async () => {
-      // PROTEKSI CROSS-DATA: Abaikan parameter URL HANYA jika target adalah file root SPA (index.html)
-      const shouldIgnoreQuery = targetReq.url.includes('index.html');
-      const cachedRes = await caches.match(targetReq, { ignoreSearch: shouldIgnoreQuery });
-      // Berikan Cache secara instan. Jika tidak ada (Kunjungan Pertama / Dihapus manual), tunggu Fetch selesai.
-      return cachedRes || fetchPromise.then(res => res || Response.error());
-    })());
-    return;
+              // Thread Lockdown Mutlak: Wajib dipanggil secara sinkron SEBELUM event loop listener berakhir
+              event.waitUntil(fetchPromise);
+              event.respondWith((async () => {
+                // PROTEKSI CROSS-DATA: Abaikan parameter URL HANYA jika target adalah file root SPA (index.html)
+                const shouldIgnoreQuery = targetReq.url.includes('index.html');
+                const cachedRes = await caches.match(targetReq, { ignoreSearch: shouldIgnoreQuery });
+                // Berikan Cache secara instan. Jika tidak ada (Kunjungan Pertama / Dihapus manual), tunggu Fetch selesai.
+                return cachedRes || fetchPromise.then(res => res || Response.error());
+              })());
+              return;
+
   }
-
-
 
   // STRATEGI 3: GOOGLE FONTS & EKSTERNAL ASSETS (Opaque Protection & Cache-First)
   if (reqUrl.hostname === 'fonts.googleapis.com' || reqUrl.hostname === 'fonts.gstatic.com') {
@@ -168,14 +168,12 @@ self.addEventListener('fetch', event => {
       if (cachedRes) return cachedRes; // Balas instan dari memori
 
       try {
-        // [SURGICAL FIX] AUTO-CORS UPGRADE: Memaksa no-cors menjadi cors mutlak untuk memecah Opaque Response menjadi 200 OK.
-        // THE INTEGRITY SHIELD: Kloning objek req (bukan string URL) agar SRI Hash & Headers tidak hancur.
-        const corsReq = new Request(req, { mode: 'cors' });
-        const networkRes = await fetch(corsReq);
+        // [BLUEPRINT BULLETPROOF] OPAQUE SAFE-HARBOR: CSS Google Fonts tidak merilis header CORS.
+        // Memaksa 'cors' akan memicu Network Crash. Kita harus mengeksekusi fetch alami dan menampung Opaque Response.
+        const networkRes = await fetch(req);
         
-        // PROTEKSI KUOTA MUTLAK: Karena sudah di-upgrade, response dijamin 200 OK dan lolos dari status Opaque.
-
-        if (networkRes && networkRes.ok && networkRes.type !== 'opaque') {
+        // PROTEKSI EKSKLUSIF: Terima response.ok ATAU response.type === 'opaque' khusus untuk domain Font
+        if (networkRes && (networkRes.ok || networkRes.type === 'opaque')) {
           const clone = networkRes.clone();
           backgroundTask = (async () => {
             const cache = await caches.open(CACHE_STATIC);
@@ -208,9 +206,10 @@ self.addEventListener('fetch', event => {
         const clone = networkRes.clone();
         
         bgDynamicTask = (async () => {
-          // PROTEKSI MEMORI STATIC: Kunci deteksi pada ujung direktori (endsWith) mencegah False-Positive Cache Poisoning
+          // PROTEKSI MEMORI STATIC: Kunci deteksi ganda (Absolute CDN & Local Path) mencegah Cache Orphan
           const isCoreAsset = staticAssets.some(a => {
-            const cleanAsset = a.replace('./', '');
+            if (a.startsWith('http')) return reqUrl.href === a; // Pengecekan absolut untuk aset CDN (Excel)
+            const cleanAsset = a.replace('./', '/');
             return reqUrl.pathname.endsWith(cleanAsset);
           });
           const cacheName = isCoreAsset ? CACHE_STATIC : CACHE_DYNAMIC;
