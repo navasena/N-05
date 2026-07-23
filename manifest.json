@@ -2,7 +2,7 @@
   "id": "portal-navasena-core",
   "name": "Portal NAVASENA",
   "short_name": "R-05",
-  "description": "Aplikasi Manajemen Keuangan & Pembukuan Karang Taruna NAVASENA",
+  "description": "Buku Kas Digital Karang Taruna NAVASENA, BERSATU • BERKARYA • BERDAYA",
   "start_url": "./index.html?mode=pwa",
   "scope": "./",
   "display": "standalone",
