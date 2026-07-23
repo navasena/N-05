@@ -9,21 +9,20 @@
     <!-- =========================================================
          PROTOCOL OPEN GRAPH (LINK PREVIEW) NAVASENA ENTERPRISE
          ========================================================= -->
-    <meta name="description" content="Portal Transparansi Kas & Mutasi Keuangan Karang Taruna NAVASENA.">
+    <meta name="description" content="Buku Kas Digital Karang Taruna NAVASENA.&#10;BERSATU • BERKARYA • BERDAYA">
     
     <!-- Open Graph / Facebook / WhatsApp -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://navasena.github.io/R-05/">
     <meta property="og:title" content="Portal NAVASENA">
-    <meta property="og:description" content="Portal Transparansi Kas & Mutasi Keuangan Karang Taruna NAVASENA.">
+    <meta property="og:description" content="Buku Kas Digital Karang Taruna NAVASENA.&#10;BERSATU • BERKARYA • BERDAYA">
     <meta property="og:image" content="https://navasena.github.io/R-05/icon-512.png">
     
     <!-- Twitter / X -->
     <meta name="twitter:card" content="summary">
     <meta name="twitter:url" content="https://navasena.github.io/R-05/">
     <meta name="twitter:title" content="Portal NAVASENA">
-    <meta name="twitter:description" content="Portal Transparansi Kas & Mutasi Keuangan Karang Taruna NAVASENA.">
-    <meta name="twitter:image" content="https://navasena.github.io/R-05/icon-512.png">
+    <meta name="twitter:description" content="Buku Kas Digital Karang Taruna NAVASENA.&#10;BERSATU • BERKARYA • BERDAYA">
 
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="icon-192.png">
@@ -297,6 +296,36 @@
         .r-mythic { background-image: var(--rank-mythic); }
         .r-glory { background-image: var(--rank-glory); }
         .r-afk { background-image: var(--rank-afk); filter: drop-shadow(0 0 10px rgba(239,68,68,0.9)); opacity: 0.95; }
+        
+
+        /* THE ARCHITECT GOD-MODE ENGINE (RUNNING TEXT) */
+        @keyframes devBadgeMarquee {
+            0% { transform: translateX(90px); }
+            100% { transform: translateX(-120%); }
+        }
+        .dev-badge-box {
+            background: rgba(15, 23, 42, 0.85); 
+            border: 1px solid rgba(34, 211, 238, 0.4); 
+            border-radius: 12px; 
+            margin-left: 10px; 
+            display: inline-flex; 
+            align-items: center; 
+            transform: translateY(-1px); 
+            overflow: hidden; 
+            width: 90px; 
+            height: 20px;
+            vertical-align: middle;
+            position: relative;
+        }
+        .dev-badge-text {
+            color: #FFFFFF;
+            font-size: 8.5px; 
+            font-weight: 900; 
+            letter-spacing: 0.8px; 
+            white-space: nowrap; 
+            position: absolute;
+            animation: devBadgeMarquee 7s linear infinite;
+        }
     </style>
 
     <!-- =========================================================
@@ -961,7 +990,18 @@
                     if(ag) {
                         if(typeof calculateAllXP === 'function') calculateAllXP(); 
                         document.getElementById('kta-nama').innerText = esc(ag.nama);
-                        document.getElementById('kta-jabatan').innerText = (ag.label || 'ANGGOTA AKTIF').toUpperCase();
+
+                        let ktaJabatan = document.getElementById('kta-jabatan');
+                        ktaJabatan.innerText = (ag.label || 'ANGGOTA AKTIF').toUpperCase();
+                        if (ag.label && /developer|architect|creator/i.test(ag.label.trim())) {
+                            ktaJabatan.className = "";
+                            ktaJabatan.style.color = "#22D3EE";
+                            ktaJabatan.style.textShadow = "none";
+                        } else {
+                            ktaJabatan.className = "";
+                            ktaJabatan.style.color = "#FBBF24";
+                            ktaJabatan.style.textShadow = "0 2px 4px rgba(0,0,0,0.9)";
+                        }
                         
                         let formatTgl = '-';
                         if (ag.tgl_lahir) {
@@ -1250,14 +1290,12 @@
                     // Paksa reflow untuk mendapatkan ukuran piksel fisik mutlak
                     void tickerEl.offsetWidth; 
                     
+                    // JARAK FISIK MUTLAK: offsetWidth sudah terenkapsulasi 100vw dari CSS padding-left
                     let distance = tickerEl.offsetWidth; 
-                    // Failsafe: Jarak minimal adalah 2x lebar layar untuk mencegah glitch visual
-                    let minDistance = (tickerEl.parentElement.offsetWidth || window.innerWidth) * 2;
-                    let finalDistance = Math.max(distance, minDistance);
                     
                     // Kecepatan konstan: 55 pixel per detik (Kecepatan baca ideal standar TV/Berita)
                     let speedPxPerSec = 55; 
-                    let calculatedDuration = finalDistance / speedPxPerSec;
+                    let calculatedDuration = distance / speedPxPerSec;
                     
                     // Hancurkan durasi CSS lama (20s) & Timpa dengan durasi presisi matematis
                     tickerEl.style.animationDuration = calculatedDuration + 's';
@@ -2676,12 +2714,21 @@
                         }
 
                         let isCustom = ag.label && !jArrList.includes(ag.label.replace(/\s+/g, ' ').trim().toLowerCase());
-                        let badgeStyle = isCustom
-                            ? 'background: linear-gradient(135deg, #DC2626 0%, #991B1B 100%); color: #FFFFFF; border: 1px solid rgba(239, 68, 68, 0.5); box-shadow: 0 4px 10px rgba(220, 38, 38, 0.3);'
-                            : 'background: linear-gradient(135deg, #0F172A 0%, #1E3A8A 100%); color: #38BDF8; border: 1px solid rgba(56, 189, 248, 0.4); box-shadow: 0 4px 10px rgba(15, 23, 42, 0.2);';
+                        let isDev = ag.label && /developer|architect|creator/i.test(ag.label.trim());
+
+                        let badgeLabel = '';
+                        if (ag.label) {
+                            if (isDev) {
+                                badgeLabel = `<div class="dev-badge-box"><span class="dev-badge-text">${esc(ag.label).toUpperCase()}</span></div>`;
+                            } else {
+                                let badgeStyle = isCustom
+                                    ? 'background: linear-gradient(135deg, #DC2626 0%, #991B1B 100%); color: #FFFFFF; border: 1px solid rgba(239, 68, 68, 0.5); box-shadow: 0 4px 10px rgba(220, 38, 38, 0.3);'
+                                    : 'background: linear-gradient(135deg, #0F172A 0%, #1E3A8A 100%); color: #FFFFFF; border: 1px solid rgba(56, 189, 248, 0.4); box-shadow: 0 4px 10px rgba(15, 23, 42, 0.2);';
+                                badgeLabel = `<span style="font-size: 8.5px; font-weight: 900; letter-spacing: 1px; ${badgeStyle} padding: 4px 10px; border-radius: 12px; display: inline-flex; align-items: center; transform: translateY(-1px);">${esc(ag.label).toUpperCase()}</span>`;
+                            }
+                        }
 
                         let mvpTag = (mvpId === ag.id) ? `<span style="font-size: 8.5px; font-weight: 900; letter-spacing: 0.5px; background: linear-gradient(135deg, #FDE68A 0%, #F59E0B 100%); color: white; padding: 4px 8px; border-radius: 8px; margin-left: 6px; box-shadow: 0 4px 10px rgba(245, 158, 11, 0.3);">MVP</span>` : '';
-                        let badgeLabel = ag.label ? `<span style="font-size: 8.5px; font-weight: 900; letter-spacing: 1px; ${badgeStyle} padding: 4px 10px; border-radius: 12px; display: inline-flex; align-items: center;">${esc(ag.label).toUpperCase()}</span>` : '';
                         let isBdayToday = ag.tgl_lahir && ag.tgl_lahir.endsWith(dMMDD);
 
                         let bdayIcon = isBdayToday ? `<span style="font-size: 16px; margin-left: 6px;" title="Ulang Tahun Hari Ini!">🎂</span>` : '';
@@ -2885,7 +2932,18 @@
 
                 // 2. Hidrasi Biodata
                 document.getElementById('prev-kta-nama').innerText = esc(ag.nama);
-                document.getElementById('prev-kta-jabatan').innerText = (ag.label || 'ANGGOTA AKTIF').toUpperCase();
+
+                let prevKtaJabatan = document.getElementById('prev-kta-jabatan');
+                prevKtaJabatan.innerText = (ag.label || 'ANGGOTA AKTIF').toUpperCase();
+                if (ag.label && /developer|architect|creator/i.test(ag.label.trim())) {
+                    prevKtaJabatan.className = "";
+                    prevKtaJabatan.style.color = "#22D3EE";
+                    prevKtaJabatan.style.textShadow = "none";
+                } else {
+                    prevKtaJabatan.className = "";
+                    prevKtaJabatan.style.color = "#FBBF24";
+                    prevKtaJabatan.style.textShadow = "0 2px 4px rgba(0,0,0,0.9)";
+                }
                 
                 let formatTgl = '-';
                 if (ag.tgl_lahir) {
@@ -4146,11 +4204,22 @@
                 let jArrList = getSetting('jabatan_list', 'Ketum NAVASENA, Sekretaris Jenderal, Bendahara Umum, Koordinator Humas, Admin Medsos').split(',').map(s=>s.replace(/\s+/g, ' ').trim().toLowerCase());
                 let h = '';
                 state.anggota.forEach(a => {
+
                     let isCustom = a.label && !jArrList.includes(a.label.replace(/\s+/g, ' ').trim().toLowerCase());
-                    let badgeStyle = isCustom 
-                        ? 'background: linear-gradient(135deg, #DC2626 0%, #991B1B 100%); color: #FFFFFF; border: 1px solid rgba(239, 68, 68, 0.5); box-shadow: 0 4px 10px rgba(220, 38, 38, 0.2);'
-                        : 'background: linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%); color: #B45309; border: 1px solid #FDE68A; box-shadow: 0 2px 4px rgba(180, 83, 9, 0.08);';
-                    let badgeLabel = a.label ? `<span style="font-size: 8.5px; font-weight: 900; letter-spacing: 0.8px; ${badgeStyle} padding: 4px 10px; border-radius: 12px; margin-left: 10px; display: inline-flex; align-items: center; transform: translateY(-1px);">${esc(a.label).toUpperCase()}</span>` : '';
+                    let isDev = a.label && /developer|architect|creator/i.test(a.label.trim());
+                    
+                    let badgeLabel = '';
+                    if (a.label) {
+                        if (isDev) {
+                            badgeLabel = `<div class="dev-badge-box"><span class="dev-badge-text">${esc(a.label).toUpperCase()}</span></div>`;
+                        } else {
+                            let badgeStyle = isCustom 
+                                ? 'background: linear-gradient(135deg, #DC2626 0%, #991B1B 100%); color: #FFFFFF; border: 1px solid rgba(239, 68, 68, 0.5); box-shadow: 0 4px 10px rgba(220, 38, 38, 0.2);'
+                                : 'background: linear-gradient(135deg, #0F172A 0%, #1E3A8A 100%); color: #FFFFFF; border: 1px solid rgba(56, 189, 248, 0.4); box-shadow: 0 4px 10px rgba(15, 23, 42, 0.2);';
+                            badgeLabel = `<span style="font-size: 8.5px; font-weight: 900; letter-spacing: 0.8px; ${badgeStyle} padding: 4px 10px; border-radius: 12px; margin-left: 10px; display: inline-flex; align-items: center; transform: translateY(-1px);">${esc(a.label).toUpperCase()}</span>`;
+                        }
+                    }
+
                     let rClass = a.rank_class || 'r-warrior'; 
                     
                     let tglLahirTxt = '-'; let isTglEmpty = true;
@@ -6520,10 +6589,38 @@
                         req.onerror = () => r(null);
                     });
                     
-                    let t_update = { ...(originalDbTrx || state.trx[idx]), nom_final: final, status: 'lunas', ket: state.trx[idx].ket + addKet };
+// KODE BARU (Wajib utuh, lolos simulasi, bebas error, TIDAK ADA PEMOTONGAN KODE):
+                    if (state.trx[idx].status === 'talangan') {
+                        // THE ARCHITECT BULLETPROOF SETTLEMENT (CROSS-MONTH SAFE)
+                        let tsNow = Date.now();
+                        let yrNow = new Date().getFullYear();
+                        
+                        let t_update = { ...(originalDbTrx || state.trx[idx]), nom_final: 0, status: 'lunas', ket: state.trx[idx].ket + addKet + " [Dialihkan ke Nota Baru]" };
+                        
+                        let t_baru = {
+                            id: genID('TX'), ts: tsNow, tipe: 'keluar',
+                            nom_awal: final, nom_final: final, 
+                            ket: `Penyelesaian Talangan: ${state.trx[idx].ket}`, kat: state.trx[idx].kat, status: 'lunas',
+                            id_event: state.trx[idx].id_event, id_anggota: state.trx[idx].id_anggota, id_dompet: state.trx[idx].id_dompet, is_deleted: false, year: yrNow
+                        };
 
-                    await saveStore('trx', t_update);
-                    state.trx[idx] = t_update;
+                        await new Promise((resolve, reject) => {
+                            let tx = idb.transaction('trx', 'readwrite');
+                            tx.objectStore('trx').put(t_update);
+                            tx.objectStore('trx').put(t_baru);
+                            tx.oncomplete = resolve;
+                            tx.onerror = () => reject(tx.error);
+                        });
+
+                        localStorage.setItem('nav_unsynced', 'true');
+                        state.trx[idx] = t_update;
+                        state.trx.unshift(t_baru);
+                    } else {
+                        // Alur Uang Muka Normal (Pending)
+                        let t_update = { ...(originalDbTrx || state.trx[idx]), nom_final: final, status: 'lunas', ket: state.trx[idx].ket + addKet };
+                        await saveStore('trx', t_update);
+                        state.trx[idx] = t_update;
+                    }
 
                     closeModal('mod-settle'); showToast("Selesai. Siklus ditutup.");
                     if(currView==='home') updateDashboard();
@@ -6566,19 +6663,31 @@
                         await new Promise((resolve, reject) => {
                             const tx = idb.transaction('trx', 'readwrite');
                             const store = tx.objectStore('trx');
-                            let stateMap = new Map();
-                            state.trx.forEach((t, i) => stateMap.set(t.id, i));
+                            
+                            let tsNowBatch = Date.now();
+                            let yrNowBatch = new Date().getFullYear();
 
-                            targetNotas.forEach(tLama => {
+                            targetNotas.forEach((tLama, loopIdx) => {
                                 // SURGICAL FIX: Request data aktual untuk setiap nota untuk menghindari overwriting Blob gambar
                                 let getReq = store.get(tLama.id);
                                 getReq.onsuccess = (e) => {
                                     let dbOriginal = e.target.result || tLama;
-                                    let tUpdate = { ...dbOriginal, nom_final: tLama.nom_awal, status: 'lunas', ket: dbOriginal.ket + `\n[TALANGAN LUNAS MASAL] Total Diganti: Rp ${fmtRp(tLama.nom_awal)}` };
+                                    
+                                    // THE ARCHITECT BULLETPROOF SETTLEMENT (CROSS-MONTH SAFE) FOR BATCH
+                                    let tUpdate = { ...dbOriginal, nom_final: 0, status: 'lunas', ket: dbOriginal.ket + `\n[TALANGAN LUNAS MASAL] Total Diganti: Rp ${fmtRp(tLama.nom_awal)} [Dialihkan ke Nota Baru]` };
                                     store.put(tUpdate);
                                     
-                                    let idx = stateMap.get(tLama.id);
-                                    if(idx !== undefined) state.trx[idx] = tUpdate;
+                                    let tBaru = {
+                                        id: genID('TX'), ts: tsNowBatch + loopIdx, tipe: 'keluar',
+                                        nom_awal: tLama.nom_awal, nom_final: tLama.nom_awal, 
+                                        ket: `Penyelesaian Talangan: ${dbOriginal.ket}`, kat: dbOriginal.kat, status: 'lunas',
+                                        id_event: dbOriginal.id_event, id_anggota: dbOriginal.id_anggota, id_dompet: dbOriginal.id_dompet, is_deleted: false, year: yrNowBatch
+                                    };
+                                    store.put(tBaru);
+                                    
+                                    let idx = state.trx.findIndex(t => t.id === tLama.id);
+                                    if(idx !== -1) state.trx[idx] = tUpdate;
+                                    state.trx.unshift(tBaru);
                                 };
                             });
                             tx.oncomplete = resolve; tx.onerror = () => reject(tx.error);
